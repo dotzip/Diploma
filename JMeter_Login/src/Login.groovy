@@ -22,7 +22,7 @@ log.info("=== Login sampler ===")
 
 driver.get("localhost")
 driver.findElement(By.id("IDToken1")).click()
-driver.findElement(By.id("IDToken1")). sendKeys("john")
+driver.findElement(By.id("IDToken1")).sendKeys("john")
 driver.findElement(By.id("IDToken2")).click()
 driver.findElement(By.id("IDToken2")).sendKeys("Admin123!")
 
