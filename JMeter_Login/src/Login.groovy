@@ -1,5 +1,6 @@
 import org.openqa.selenium.By
 import org.openqa.selenium.WebDriver
+import org.openqa.selenium.WebElement
 import org.openqa.selenium.chrome.ChromeDriver
 import org.apache.jmeter.samplers.SampleResult
 import java.util.concurrent.TimeUnit
@@ -33,3 +34,7 @@ result.sampleEnd()
 log.info("Login's time: ${(result.endTime - result.startTime) / 1000} seconds")
 
 log.info("=== End ===")
+
+//New Module
+driver.findElement(By.xpath("//ul[@id='menu']/li[2]")).click()
+driver.findElement(By.xpath("//ul[@id='menu']/li[2]/ul/li[1]")).click()
