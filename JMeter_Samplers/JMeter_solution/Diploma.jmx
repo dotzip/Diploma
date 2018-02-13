@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="3.2" jmeter="3.3 r1808647">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Test Plan" enabled="true">
+      <stringProp name="TestPlan.comments"></stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+        <collectionProp name="Arguments.arguments"/>
+      </elementProp>
+      <stringProp name="TestPlan.user_define_classpath"></stringProp>
+    </TestPlan>
+    <hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Thread Group" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">1</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">1</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <longProp name="ThreadGroup.start_time">1518442030000</longProp>
+        <longProp name="ThreadGroup.end_time">1518442030000</longProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+      </ThreadGroup>
+      <hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Application" enabled="true">
+          <stringProp name="cacheKey"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="script">def myXls = vars.getObject(&quot;XLS1&quot;)
+def driver = vars.getObject(&quot;DRIVER&quot;)
+def result = vars.getObject(&quot;RESULT&quot;)
+
+//log.info(&quot;APP: ${myXls.controlsListIndex_}&quot;)
+
+log.info(&quot;======= DEBUG: ${myXls.getStringDataRecord(&quot;SurnameTxt&quot;)} =======&quot;)
+log.info(&quot;======= DEBUG: ${myXls.getDateDataRecord(&quot;id-DOBDate hasDatepicker&quot;)} =======&quot;)
+log.info(&quot;======= DEBUG: ${myXls.getNumberDataRecord(&quot;HomePhoneNumberTxt&quot;)} =======&quot;)
+log.info(&quot;======= DEBUG: ${myXls.getStringDataRecord(&quot;CountryDDL&quot;)} =======&quot;)
+
+//New application
+driver.findElement(By.xpath(&quot;//ul[@id=&apos;menu&apos;]/li[2]&quot;)).click()
+driver.findElement(By.xpath(&quot;//ul[@id=&apos;menu&apos;]/li[2]/ul/li[1]&quot;)).click()</stringProp>
+          <stringProp name="scriptLanguage">groovy</stringProp>
+        </JSR223Sampler>
+        <hashTree>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Data Pool Extractor PreProcessor" enabled="true">
+            <stringProp name="cacheKey"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="script">import org.apache.poi.hssf.usermodel.HSSFRow
+import org.apache.poi.hssf.usermodel.HSSFSheet
+import org.apache.poi.hssf.usermodel.HSSFWorkbook
+
+class DataPoolExtractor {
+    private String dataPoolFilePath_
+    private HSSFWorkbook workbook_
+    private HSSFSheet sheet_
+    private int customerColumnIndex_
+    private int controlsListIndex_
+
+
+    DataPoolExtractor(String dataPoolFilePath){
+        this.dataPoolFilePath_ = dataPoolFilePath
+        this.workbook_ = new HSSFWorkbook(new FileInputStream(dataPoolFilePath_))
+    }
+
+    void sheetLoader(String sheetName){
+        this.sheet_ = workbook_.getSheet(sheetName)
+    }
+
+    void controlsListLoader(String controlsListIndex){
+        HSSFRow topRow = sheet_.getRow(0)
+        topRow.each { cell -&gt;
+            if (cell.stringCellValue.equals(controlsListIndex)) {
+                this.controlsListIndex_ = cell.getColumnIndex()
+            }
+        }
+    }
+
+    void customerLoader(String customerCellID) {
+        HSSFRow topRow = sheet_.getRow(0)
+        topRow.each { cell -&gt;
+            if (cell.stringCellValue.equals(customerCellID)) {
+                this.customerColumnIndex_ = cell.getColumnIndex()
+            }
+        }
+    }
+
+    String getStringDataRecord(String controlsName){
+        try {
+            def flag = true
+            for (int i = 0; flag; i++) {
+                HSSFRow row = sheet_.getRow(i)
+                if (row.getCell(controlsListIndex_).stringCellValue == controlsName) {
+                    return row.getCell(customerColumnIndex_).stringCellValue
+                    flag = false
+                }
+            }
+        }catch (Exception ex){
+            print ex.getMessage()
+        }
+    }
+
+    Date getDateDataRecord(String controlsName){
+        try {
+            def flag = true
+            for (int i = 0; flag; i++) {
+                HSSFRow row = sheet_.getRow(i)
+                if (row.getCell(controlsListIndex_).stringCellValue == controlsName) {
+                    return Date.parse(&quot;yyyymmdd&quot;, row.getCell(customerColumnIndex_).stringCellValue)
+                    flag = false
+                }
+            }
+        }catch (Exception ex){
+            print ex.getMessage()
+        }
+    }
+
+    int getNumberDataRecord(String controlsName){
+        try {
+            def flag = true
+            for (int i = 0; flag; i++) {
+                HSSFRow row = sheet_.getRow(i)
+                if (row.getCell(controlsListIndex_).stringCellValue == controlsName) {
+                    return (int)row.getCell(customerColumnIndex_).numericCellValue
+                    flag = false
+                }
+            }
+        }catch (Exception ex){
+            print ex.getMessage()
+        }
+    }
+}
+
+
+DataPoolExtractor xls1 = new DataPoolExtractor(&quot;C:\\Users\\c22466a\\Documents\\Diploma\\tc-pco-create-app.xls&quot;)
+xls1.sheetLoader(&quot;Inputs&quot;)
+xls1.controlsListLoader(&quot;Field&quot;)
+xls1.customerLoader(&quot;TC1&quot;)
+
+vars.putObject(&quot;XLS1&quot;, xls1)
+</stringProp>
+            <stringProp name="scriptLanguage">groovy</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Login PreProcessor" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey"></stringProp>
+            <stringProp name="script">import org.openqa.selenium.By
+import org.openqa.selenium.WebDriver
+import org.openqa.selenium.WebElement
+import org.openqa.selenium.chrome.ChromeDriver
+import org.apache.jmeter.samplers.SampleResult
+import java.util.concurrent.TimeUnit
+
+/**
+ * @System.setProperty for browser
+ * @WebDriver object for browser management
+ * @SampleResult for timestamps
+ */
+
+System.setProperty(&quot;webdriver.chrome.driver&quot;, &quot;path_to_browser_driver\\chromedriver.exe&quot;)
+
+WebDriver driver = new ChromeDriver()
+
+SampleResult result = new SampleResult()
+
+driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS)
+
+log.info(&quot;=== Login sampler ===&quot;)
+
+driver.get(&quot;localhost&quot;)
+driver.findElement(By.id(&quot;IDToken1&quot;)).click()
+driver.findElement(By.id(&quot;IDToken1&quot;)).sendKeys(&quot;john&quot;)
+driver.findElement(By.id(&quot;IDToken2&quot;)).click()
+driver.findElement(By.id(&quot;IDToken2&quot;)).sendKeys(&quot;Admin123!&quot;)
+
+result.sampleStart()
+driver.findElement(By.name(&quot;Login.Submit&quot;)).click()
+result.sampleEnd()
+
+log.info(&quot;Login&apos;s time: ${(result.endTime - result.startTime) / 1000} seconds&quot;)
+
+log.info(&quot;=== End ===&quot;)
+
+vars.putObject(&quot;DRIVER&quot;, driver)
+vars.putObject(&quot;RESULT&quot;, result)
+</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+        </hashTree>
+        <ResultCollector guiclass="TableVisualizer" testclass="ResultCollector" testname="View Results in Table" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+    </hashTree>
+    <WorkBench guiclass="WorkBenchGui" testclass="WorkBench" testname="WorkBench" enabled="true">
+      <boolProp name="WorkBench.save">true</boolProp>
+    </WorkBench>
+    <hashTree/>
+  </hashTree>
+</jmeterTestPlan>

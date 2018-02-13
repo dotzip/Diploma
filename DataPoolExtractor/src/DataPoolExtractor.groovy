@@ -52,13 +52,13 @@ class DataPoolExtractor {
         }
     }
 
-    String getDateDataRecord(String controlsName){
+    Date getDateDataRecord(String controlsName){
         try {
             def flag = true
             for (int i = 0; flag; i++) {
                 HSSFRow row = sheet_.getRow(i)
                 if (row.getCell(controlsListIndex_).stringCellValue == controlsName) {
-                    return row.getCell(customerColumnIndex_).stringCellValue
+                    return Date.parse("yyyymmdd", row.getCell(customerColumnIndex_).stringCellValue)
                     flag = false
                 }
             }
@@ -93,7 +93,14 @@ class DataPoolExtractor {
         println "======= DEBUG: ${xls1.getNumberDataRecord("HomePhoneNumberTxt")} ======="
         println "======= DEBUG: ${xls1.getStringDataRecord("CountryDDL")} ======="
 
-
     }
 
 }
+
+/*
+DataPoolExtractor xls1 = new DataPoolExtractor("path_to\\file.xls")
+xls1.sheetLoader("Inputs")
+xls1.controlsListLoader("Field")
+xls1.customerLoader("TC1")
+
+vars.putObject("XLS1", xls1)*/

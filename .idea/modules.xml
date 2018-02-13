@@ -3,7 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/DataPoolExtractor/DataPoolExtractor.iml" filepath="$PROJECT_DIR$/DataPoolExtractor/DataPoolExtractor.iml" />
-      <module fileurl="file://$PROJECT_DIR$/JMeter_Login/JMeter_Login.iml" filepath="$PROJECT_DIR$/JMeter_Login/JMeter_Login.iml" />
+      <module fileurl="file://$PROJECT_DIR$/JMeter_Samplers/JMeter_Samplers.iml" filepath="$PROJECT_DIR$/JMeter_Samplers/JMeter_Samplers.iml" />
     </modules>
   </component>
 </project>

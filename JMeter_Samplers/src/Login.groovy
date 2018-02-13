@@ -1,6 +1,5 @@
 import org.openqa.selenium.By
 import org.openqa.selenium.WebDriver
-import org.openqa.selenium.WebElement
 import org.openqa.selenium.chrome.ChromeDriver
 import org.apache.jmeter.samplers.SampleResult
 import java.util.concurrent.TimeUnit
@@ -19,7 +18,7 @@ SampleResult result = new SampleResult()
 
 driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS)
 
-log.info("=== Login sampler ===")
+/*log.info("=== Login sampler ===")*/
 
 driver.get("localhost")
 driver.findElement(By.id("IDToken1")).click()
@@ -31,10 +30,9 @@ result.sampleStart()
 driver.findElement(By.name("Login.Submit")).click()
 result.sampleEnd()
 
-log.info("Login's time: ${(result.endTime - result.startTime) / 1000} seconds")
+/*log.info("Login's time: ${(result.endTime - result.startTime) / 1000} seconds")
 
-log.info("=== End ===")
+log.info("=== End ===")*/
 
-//New Module
-driver.findElement(By.xpath("//ul[@id='menu']/li[2]")).click()
-driver.findElement(By.xpath("//ul[@id='menu']/li[2]/ul/li[1]")).click()
+/*vars.putObject("DRIVER", driver)
+vars.putObject("RESULT", result)*/
