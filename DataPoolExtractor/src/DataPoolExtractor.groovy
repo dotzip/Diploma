@@ -1,13 +1,14 @@
 import org.apache.poi.hssf.usermodel.HSSFRow
 import org.apache.poi.hssf.usermodel.HSSFSheet
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
-import org.apache.poi.ss.usermodel.Cell
-import org.apache.poi.ss.usermodel.Row
 
 class DataPoolExtractor {
     private String dataPoolFilePath_
     private HSSFWorkbook workbook_
-    HSSFSheet sheet_
+    private HSSFSheet sheet_
+    private int customerColumnIndex_
+    private int controlsListIndex_
+
 
     DataPoolExtractor(String dataPoolFilePath){
         this.dataPoolFilePath_ = dataPoolFilePath
@@ -18,25 +19,81 @@ class DataPoolExtractor {
         this.sheet_ = workbook_.getSheet(sheetName)
     }
 
-    void customerLoader(String customerCellID){
-        int customerColumnIndex
+    void controlsListLoader(String controlsListIndex){
         HSSFRow topRow = sheet_.getRow(0)
-        Iterator<Cell> cells = topRow.cellIterator()
-        for (Cell cell : cells){
-            if (cell.stringCellValue.equals(customerCellID)) {
-                customerColumnIndex = cell.getColumnIndex()
+        topRow.each { cell ->
+            if (cell.stringCellValue.equals(controlsListIndex)) {
+                this.controlsListIndex_ = cell.getColumnIndex()
             }
         }
-        Iterator<Row> rows = sheet_.rowIterator()
-        for (Row row : rows){
-            row.getCell(customerColumnIndex)
+    }
+
+    void customerLoader(String customerCellID) {
+        HSSFRow topRow = sheet_.getRow(0)
+        topRow.each { cell ->
+            if (cell.stringCellValue.equals(customerCellID)) {
+                this.customerColumnIndex_ = cell.getColumnIndex()
+            }
+        }
+    }
+
+    String getStringDataRecord(String controlsName){
+        try {
+            def flag = true
+            for (int i = 0; flag; i++) {
+                HSSFRow row = sheet_.getRow(i)
+                if (row.getCell(controlsListIndex_).stringCellValue == controlsName) {
+                    return row.getCell(customerColumnIndex_).stringCellValue
+                    flag = false
+                }
+            }
+        }catch (Exception ex){
+            print ex.getMessage()
+        }
+    }
+
+    String getDateDataRecord(String controlsName){
+        try {
+            def flag = true
+            for (int i = 0; flag; i++) {
+                HSSFRow row = sheet_.getRow(i)
+                if (row.getCell(controlsListIndex_).stringCellValue == controlsName) {
+                    return row.getCell(customerColumnIndex_).stringCellValue
+                    flag = false
+                }
+            }
+        }catch (Exception ex){
+            print ex.getMessage()
+        }
+    }
+
+    int getNumberDataRecord(String controlsName){
+        try {
+            def flag = true
+            for (int i = 0; flag; i++) {
+                HSSFRow row = sheet_.getRow(i)
+                if (row.getCell(controlsListIndex_).stringCellValue == controlsName) {
+                    return (int)row.getCell(customerColumnIndex_).numericCellValue
+                    flag = false
+                }
+            }
+        }catch (Exception ex){
+            print ex.getMessage()
         }
     }
 
     static void main(String[] args) {
-        DataPoolExtractor xls1 = new DataPoolExtractor("path1")
+        DataPoolExtractor xls1 = new DataPoolExtractor("C:\\Users\\c22466a\\Documents\\Diploma\\tc-pco-create-app.xls")
         xls1.sheetLoader("Inputs")
+        xls1.controlsListLoader("Field")
         xls1.customerLoader("TC1")
+
+        println "======= DEBUG: ${xls1.getStringDataRecord("SurnameTxt")} ======="
+        println "======= DEBUG: ${xls1.getDateDataRecord("id-DOBDate hasDatepicker")} ======="
+        println "======= DEBUG: ${xls1.getNumberDataRecord("HomePhoneNumberTxt")} ======="
+        println "======= DEBUG: ${xls1.getStringDataRecord("CountryDDL")} ======="
+
+
     }
 
 }
