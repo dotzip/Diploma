@@ -26,24 +26,69 @@
         <stringProp name="ThreadGroup.delay"></stringProp>
       </ThreadGroup>
       <hashTree>
-        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Application" enabled="true">
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="New Application" enabled="true">
           <stringProp name="cacheKey"></stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
-          <stringProp name="script">def myXls = vars.getObject(&quot;XLS1&quot;)
+          <stringProp name="script">import org.openqa.selenium.By
+import org.openqa.selenium.WebDriver
+import org.openqa.selenium.chrome.ChromeDriver
+import org.apache.jmeter.samplers.SampleResult
+import org.openqa.selenium.support.ui.Select
+import org.openqa.selenium.support.ui.ExpectedConditions
+import org.openqa.selenium.support.ui.WebDriverWait
+import java.util.concurrent.TimeUnit
+
+def myXls = vars.getObject(&quot;XLS1&quot;)
 def driver = vars.getObject(&quot;DRIVER&quot;)
+def driverWait = vars.getObject(&quot;DRIVER_WAIT&quot;)
 def result = vars.getObject(&quot;RESULT&quot;)
-
-//log.info(&quot;APP: ${myXls.controlsListIndex_}&quot;)
-
-log.info(&quot;======= DEBUG: ${myXls.getStringDataRecord(&quot;SurnameTxt&quot;)} =======&quot;)
-log.info(&quot;======= DEBUG: ${myXls.getDateDataRecord(&quot;id-DOBDate hasDatepicker&quot;)} =======&quot;)
-log.info(&quot;======= DEBUG: ${myXls.getNumberDataRecord(&quot;HomePhoneNumberTxt&quot;)} =======&quot;)
-log.info(&quot;======= DEBUG: ${myXls.getStringDataRecord(&quot;CountryDDL&quot;)} =======&quot;)
 
 //New application
 driver.findElement(By.xpath(&quot;//ul[@id=&apos;menu&apos;]/li[2]&quot;)).click()
-driver.findElement(By.xpath(&quot;//ul[@id=&apos;menu&apos;]/li[2]/ul/li[1]&quot;)).click()</stringProp>
+driver.findElement(By.xpath(&quot;//ul[@id=&apos;menu&apos;]/li[2]/ul/li[1]&quot;)).click()
+
+/*Fill data*/
+
+//SELECT
+Select productSelect = new Select(driver.findElement(By.id(&quot;ApplicationTypeRbg&quot;)))
+switch(myXls.getStringDataRecord(&quot;ApplicationTypeRbg&quot;)) {
+	case &quot;Credit Card&quot; :
+		productSelect.selectByValue(&quot;C&quot;)
+		break
+	case &quot;Mortgage&quot; :
+		productSelect.selectByValue(&quot;M&quot;)
+		break
+	case &quot;Personal Loan&quot; :
+		productSelect.selectByValue(&quot;P&quot;)
+		break
+	case &quot;Instant Loan&quot; :
+		productSelect.selectByValue(&quot;I&quot;)
+		break
+}
+//TEXT FIELD
+driver.findElement(By.id(&quot;SurnameTxt&quot;)).click()
+driver.findElement(By.id(&quot;SurnameTxt&quot;)).sendKeys(myXls.getStringDataRecord(&quot;SurnameTxt&quot;))
+driver.findElement(By.id(&quot;ForenameTxt&quot;)).click()
+driver.findElement(By.id(&quot;ForenameTxt&quot;)).sendKeys(myXls.getStringDataRecord(&quot;ForenameTxt&quot;))
+//DATE
+driver.findElement(By.id(&quot;id2b&quot;)).click()
+driver.findElement(By.id(&quot;id2b&quot;)).sendKeys(myXls.getStringDataRecord(&quot;id2b&quot;))
+driver.findElement(By.id(&quot;datepicker&quot;)).click()
+//TEXT
+driver.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
+driverWait.until(ExpectedConditions.invisibilityOfElementLocated(By.className(&apos;ajax_loader&apos;)))
+driverWait.until(ExpectedConditions.elementToBeClickable(By.id(&quot;identificationCardNo&quot;))) // waiting when element will be clickable
+driver.findElement(By.id(&quot;identificationCardNo&quot;)).click()
+driver.findElement(By.id(&quot;identificationCardNo&quot;)).sendKeys(myXls.getStringDataRecord(&quot;identificationCardNo&quot;))
+driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS)
+
+
+
+//log.info(&quot;======= DEBUG: ${myXls.getStringDataRecord(&quot;SurnameTxt&quot;)} =======&quot;)
+//log.info(&quot;======= DEBUG: ${myXls.getDateDataRecord(&quot;id-DOBDate hasDatepicker&quot;)} =======&quot;)
+//log.info(&quot;======= DEBUG: ${myXls.getNumberDataRecord(&quot;HomePhoneNumberTxt&quot;)} =======&quot;)
+//log.info(&quot;======= DEBUG: ${myXls.getStringDataRecord(&quot;CountryDDL&quot;)} =======&quot;)</stringProp>
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223Sampler>
         <hashTree>
@@ -138,9 +183,11 @@ class DataPoolExtractor {
 
 
 DataPoolExtractor xls1 = new DataPoolExtractor(&quot;C:\\Users\\c22466a\\Documents\\Diploma\\tc-pco-create-app.xls&quot;)
-xls1.sheetLoader(&quot;Inputs&quot;)
+xls1.sheetLoader(&quot;MY_INPUTS&quot;)
 xls1.controlsListLoader(&quot;Field&quot;)
 xls1.customerLoader(&quot;TC1&quot;)
+
+log.info(&quot;=== DataPoolExtractor ready! ===&quot;)
 
 vars.putObject(&quot;XLS1&quot;, xls1)
 </stringProp>
@@ -154,9 +201,10 @@ vars.putObject(&quot;XLS1&quot;, xls1)
             <stringProp name="cacheKey"></stringProp>
             <stringProp name="script">import org.openqa.selenium.By
 import org.openqa.selenium.WebDriver
-import org.openqa.selenium.WebElement
 import org.openqa.selenium.chrome.ChromeDriver
 import org.apache.jmeter.samplers.SampleResult
+import org.openqa.selenium.support.ui.ExpectedConditions
+import org.openqa.selenium.support.ui.WebDriverWait
 import java.util.concurrent.TimeUnit
 
 /**
@@ -165,24 +213,26 @@ import java.util.concurrent.TimeUnit
  * @SampleResult for timestamps
  */
 
-System.setProperty(&quot;webdriver.chrome.driver&quot;, &quot;path_to_browser_driver\\chromedriver.exe&quot;)
+System.setProperty(&quot;webdriver.chrome.driver&quot;, &quot;C:\\\Users\\\c22466a\\\Documents\\\Diploma\\\apache-jmeter-3.3\\\browser_drivers\\\chromedriver.exe&quot;)
 
 WebDriver driver = new ChromeDriver()
-
 SampleResult result = new SampleResult()
+WebDriverWait driverWait = new WebDriverWait(driver, 30)
+def myXls = vars.getObject(&quot;XLS1&quot;)
 
 driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS)
 
 log.info(&quot;=== Login sampler ===&quot;)
 
-driver.get(&quot;localhost&quot;)
+driver.get(&quot;http://sso.experian.local:8080/sso/UI/Login?realm=TENANT1&quot;)
 driver.findElement(By.id(&quot;IDToken1&quot;)).click()
-driver.findElement(By.id(&quot;IDToken1&quot;)).sendKeys(&quot;john&quot;)
+driver.findElement(By.id(&quot;IDToken1&quot;)).sendKeys(myXls.getStringDataRecord(&quot;IDToken1&quot;))
 driver.findElement(By.id(&quot;IDToken2&quot;)).click()
-driver.findElement(By.id(&quot;IDToken2&quot;)).sendKeys(&quot;Admin123!&quot;)
+driver.findElement(By.id(&quot;IDToken2&quot;)).sendKeys(myXls.getStringDataRecord(&quot;IDToken2&quot;))
 
 result.sampleStart()
 driver.findElement(By.name(&quot;Login.Submit&quot;)).click()
+driverWait.until(ExpectedConditions.elementToBeClickable(By.xpath(&quot;//ul[@id=&apos;menu&apos;]/li[2]&quot;))) // waiting when homepage will be load
 result.sampleEnd()
 
 log.info(&quot;Login&apos;s time: ${(result.endTime - result.startTime) / 1000} seconds&quot;)
@@ -191,6 +241,7 @@ log.info(&quot;=== End ===&quot;)
 
 vars.putObject(&quot;DRIVER&quot;, driver)
 vars.putObject(&quot;RESULT&quot;, result)
+vars.putObject(&quot;DRIVER_WAIT&quot;, driverWait)
 </stringProp>
           </JSR223PreProcessor>
           <hashTree/>

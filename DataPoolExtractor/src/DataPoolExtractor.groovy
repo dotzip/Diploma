@@ -37,7 +37,7 @@ class DataPoolExtractor {
         }
     }
 
-    String getStringDataRecord(String controlsName){
+    String getStringDataRecord(String controlsName) {
         try {
             def flag = true
             for (int i = 0; flag; i++) {
