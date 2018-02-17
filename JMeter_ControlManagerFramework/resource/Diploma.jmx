@@ -40,10 +40,8 @@ import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
 import java.util.concurrent.TimeUnit
 
-def myXls = vars.getObject(&quot;XLS1&quot;)
+def ctrlManager = vars.getObject(&quot;CTRL_MANAGER&quot;)
 def driver = vars.getObject(&quot;DRIVER&quot;)
-def driverWait = vars.getObject(&quot;DRIVER_WAIT&quot;)
-def result = vars.getObject(&quot;RESULT&quot;)
 
 //New application
 driver.findElement(By.xpath(&quot;//ul[@id=&apos;menu&apos;]/li[2]&quot;)).click()
@@ -52,136 +50,20 @@ driver.findElement(By.xpath(&quot;//ul[@id=&apos;menu&apos;]/li[2]/ul/li[1]&quot
 /*Fill data*/
 
 //SELECT
-Select productSelect = new Select(driver.findElement(By.id(&quot;ApplicationTypeRbg&quot;)))
-productSelect.selectByVisibleText(myXls.getStringDataRecord(&quot;ApplicationTypeRbg&quot;))
+ctrlManager.selectCtrl(&quot;ApplicationTypeRbg&quot;)
 //TEXT FIELD
-driver.findElement(By.id(&quot;SurnameTxt&quot;)).click()
-driver.findElement(By.id(&quot;SurnameTxt&quot;)).sendKeys(myXls.getStringDataRecord(&quot;SurnameTxt&quot;))
-driver.findElement(By.id(&quot;ForenameTxt&quot;)).click()
-driver.findElement(By.id(&quot;ForenameTxt&quot;)).sendKeys(myXls.getStringDataRecord(&quot;ForenameTxt&quot;))
+ctrlManager.textCtrl(&quot;SurnameTxt&quot;)
+ctrlManager.textCtrl(&quot;ForenameTxt&quot;)
 //DATE
-driver.findElement(By.id(&quot;id2b&quot;)).click()
-driver.findElement(By.id(&quot;id2b&quot;)).sendKeys(myXls.getStringDataRecord(&quot;id2b&quot;))
-driver.findElement(By.id(&quot;id2b&quot;)).sendKeys(Keys.TAB)
+ctrlManager.dateCtrl(&quot;id2b&quot;)
 //TEXT
-driver.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
-driverWait.until(ExpectedConditions.invisibilityOfElementLocated(By.className(&apos;ajax_loader&apos;)))
-driverWait.until(ExpectedConditions.elementToBeClickable(By.id(&quot;identificationCardNo&quot;))) // waiting when element will be clickable
-driver.findElement(By.id(&quot;identificationCardNo&quot;)).click()
-driver.findElement(By.id(&quot;identificationCardNo&quot;)).sendKeys(myXls.getStringDataRecord(&quot;identificationCardNo&quot;))
-driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS)
+ctrlManager.textCtrl(&quot;identificationCardNo&quot;)
+ctrlManager.buttonCtrl(&quot;nav1Btn&quot;)
 
-
-
-//log.info(&quot;======= DEBUG: ${myXls.getStringDataRecord(&quot;SurnameTxt&quot;)} =======&quot;)
-//log.info(&quot;======= DEBUG: ${myXls.getDateDataRecord(&quot;id-DOBDate hasDatepicker&quot;)} =======&quot;)
-//log.info(&quot;======= DEBUG: ${myXls.getNumberDataRecord(&quot;HomePhoneNumberTxt&quot;)} =======&quot;)
-//log.info(&quot;======= DEBUG: ${myXls.getStringDataRecord(&quot;CountryDDL&quot;)} =======&quot;)</stringProp>
+</stringProp>
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223Sampler>
         <hashTree>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Data Pool Extractor PreProcessor" enabled="true">
-            <stringProp name="cacheKey"></stringProp>
-            <stringProp name="filename"></stringProp>
-            <stringProp name="parameters"></stringProp>
-            <stringProp name="script">import org.apache.poi.hssf.usermodel.HSSFRow
-import org.apache.poi.hssf.usermodel.HSSFSheet
-import org.apache.poi.hssf.usermodel.HSSFWorkbook
-
-class com.experian.DataPoolExtractor {
-    private String dataPoolFilePath_
-    private HSSFWorkbook workbook_
-    private HSSFSheet sheet_
-    private int customerColumnIndex_
-    private int controlsListIndex_
-
-
-    com.experian.DataPoolExtractor(String dataPoolFilePath){
-        this.dataPoolFilePath_ = dataPoolFilePath
-        this.workbook_ = new HSSFWorkbook(new FileInputStream(dataPoolFilePath_))
-    }
-
-    void sheetLoader(String sheetName){
-        this.sheet_ = workbook_.getSheet(sheetName)
-    }
-
-    void controlsListLoader(String controlsListIndex){
-        HSSFRow topRow = sheet_.getRow(0)
-        topRow.each { cell -&gt;
-            if (cell.stringCellValue.equals(controlsListIndex)) {
-                this.controlsListIndex_ = cell.getColumnIndex()
-            }
-        }
-    }
-
-    void customerLoader(String customerCellID) {
-        HSSFRow topRow = sheet_.getRow(0)
-        topRow.each { cell -&gt;
-            if (cell.stringCellValue.equals(customerCellID)) {
-                this.customerColumnIndex_ = cell.getColumnIndex()
-            }
-        }
-    }
-
-    String getStringDataRecord(String controlsName){
-        try {
-            def flag = true
-            for (int i = 0; flag; i++) {
-                HSSFRow row = sheet_.getRow(i)
-                if (row.getCell(controlsListIndex_).stringCellValue == controlsName) {
-                    return row.getCell(customerColumnIndex_).stringCellValue
-                    flag = false
-                }
-            }
-        }catch (Exception ex){
-            print ex.getMessage()
-        }
-    }
-
-    Date getDateDataRecord(String controlsName){
-        try {
-            def flag = true
-            for (int i = 0; flag; i++) {
-                HSSFRow row = sheet_.getRow(i)
-                if (row.getCell(controlsListIndex_).stringCellValue == controlsName) {
-                    return Date.parse(&quot;yyyymmdd&quot;, row.getCell(customerColumnIndex_).stringCellValue)
-                    flag = false
-                }
-            }
-        }catch (Exception ex){
-            print ex.getMessage()
-        }
-    }
-
-    int getNumberDataRecord(String controlsName){
-        try {
-            def flag = true
-            for (int i = 0; flag; i++) {
-                HSSFRow row = sheet_.getRow(i)
-                if (row.getCell(controlsListIndex_).stringCellValue == controlsName) {
-                    return (int)row.getCell(customerColumnIndex_).numericCellValue
-                    flag = false
-                }
-            }
-        }catch (Exception ex){
-            print ex.getMessage()
-        }
-    }
-}
-
-
-com.experian.DataPoolExtractor xls1 = new com.experian.DataPoolExtractor(&quot;C:\\Users\\c22466a\\Documents\\Diploma\\tc-pco-create-app.xls&quot;)
-xls1.sheetLoader(&quot;MY_INPUTS&quot;)
-xls1.controlsListLoader(&quot;Field&quot;)
-xls1.customerLoader(&quot;TC1&quot;)
-
-log.info(&quot;=== com.experian.DataPoolExtractor ready! ===&quot;)
-
-vars.putObject(&quot;XLS1&quot;, xls1)
-</stringProp>
-            <stringProp name="scriptLanguage">groovy</stringProp>
-          </JSR223PreProcessor>
-          <hashTree/>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Login PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">groovy</stringProp>
             <stringProp name="parameters"></stringProp>
@@ -205,23 +87,27 @@ System.setProperty(&quot;webdriver.chrome.driver&quot;, &quot;C:\\\Users\\\c2246
 
 WebDriver driver = new ChromeDriver()
 SampleResult result = new SampleResult()
-WebDriverWait driverWait = new WebDriverWait(driver, 30)
-def myXls = vars.getObject(&quot;XLS1&quot;)
+WebDriverWait driverWait = new WebDriverWait(driver, 60)
 
-driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS)
+driver.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS)
 
 log.info(&quot;=== Login sampler ===&quot;)
 
 driver.get(&quot;http://sso.experian.local:8080/sso/UI/Login?realm=TENANT1&quot;)
 driver.findElement(By.id(&quot;IDToken1&quot;)).click()
-driver.findElement(By.id(&quot;IDToken1&quot;)).sendKeys(myXls.getStringDataRecord(&quot;IDToken1&quot;))
+driver.findElement(By.id(&quot;IDToken1&quot;)).sendKeys(&quot;john&quot;)
 driver.findElement(By.id(&quot;IDToken2&quot;)).click()
-driver.findElement(By.id(&quot;IDToken2&quot;)).sendKeys(myXls.getStringDataRecord(&quot;IDToken2&quot;))
+driver.findElement(By.id(&quot;IDToken2&quot;)).sendKeys(&quot;Admin123!&quot;)
 
+def timeStamp = result.timeStamp
 result.sampleStart()
 driver.findElement(By.name(&quot;Login.Submit&quot;)).click()
 driverWait.until(ExpectedConditions.elementToBeClickable(By.xpath(&quot;//ul[@id=&apos;menu&apos;]/li[2]&quot;))) // waiting when homepage will be load
 result.sampleEnd()
+
+def subResult = new SampleResult(timeStamp, result.endTime - result.startTime)
+subResult.setSampleLabel(&quot;TIME LOADING LOGIN PAGE&quot;)
+result.addRawSubResult(subResult)
 
 log.info(&quot;Login&apos;s time: ${(result.endTime - result.startTime) / 1000} seconds&quot;)
 
@@ -230,6 +116,173 @@ log.info(&quot;=== End ===&quot;)
 vars.putObject(&quot;DRIVER&quot;, driver)
 vars.putObject(&quot;RESULT&quot;, result)
 vars.putObject(&quot;DRIVER_WAIT&quot;, driverWait)
+</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Control Manager PreProcessor" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey"></stringProp>
+            <stringProp name="script">import org.openqa.selenium.By
+import org.openqa.selenium.Keys
+import org.openqa.selenium.WebDriver
+import org.openqa.selenium.support.ui.ExpectedConditions
+import org.openqa.selenium.support.ui.Select
+import org.openqa.selenium.support.ui.WebDriverWait
+import org.apache.poi.hssf.usermodel.HSSFRow
+import org.apache.poi.hssf.usermodel.HSSFSheet
+import org.apache.poi.hssf.usermodel.HSSFWorkbook
+import java.util.concurrent.TimeUnit
+
+class DataPoolExtractor {
+    private String dataPoolFilePath_
+    private HSSFWorkbook workbook_
+    private HSSFSheet sheet_
+    private int customerColumnIndex_
+    private int controlsListIndex_
+    private int sheetSize_
+
+
+    DataPoolExtractor(String dataPoolFilePath){
+        this.dataPoolFilePath_ = dataPoolFilePath
+        this.workbook_ = new HSSFWorkbook(new FileInputStream(dataPoolFilePath_))
+    }
+
+    void sheetLoader(String sheetName){
+        this.sheet_ = workbook_.getSheet(sheetName)
+        this.sheetSize_ = sheet_.lastRowNum
+    }
+
+    void controlsListLoader(String controlsListIndex){
+        HSSFRow topRow = sheet_.getRow(0)
+        topRow.each { cell -&gt;
+            if (cell.stringCellValue.equals(controlsListIndex)) {
+                this.controlsListIndex_ = cell.getColumnIndex()
+            }
+        }
+    }
+
+    void customerLoader(String customerCellID) {
+        HSSFRow topRow = sheet_.getRow(0)
+        topRow.each { cell -&gt;
+            if (cell.stringCellValue.equals(customerCellID)) {
+                this.customerColumnIndex_ = cell.getColumnIndex()
+            }
+        }
+    }
+
+    String getStringDataRecord(String controlID) {
+        try {
+            for (int i = 0; i &lt; sheetSize_; i++) {
+                HSSFRow row = sheet_.getRow(i)
+                if (row.getCell(controlsListIndex_).stringCellValue == controlID) {
+                    return row.getCell(customerColumnIndex_).stringCellValue
+                }
+            }
+        }catch (Exception ex){
+            print ex.getMessage()
+        }
+    }
+}
+
+class ControlManager {
+    private WebDriverWait driverWait_
+    private WebDriver driver_
+    private DataPoolExtractor xls_
+
+    ControlManager(WebDriver driver, WebDriverWait driverWait, DataPoolExtractor xls){
+        this.driverWait_ = driverWait
+        this.driver_ = driver
+        this.xls_ = xls
+    }
+
+	void waitActive(){
+		driver_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
+	     driverWait_.until(ExpectedConditions.invisibilityOfElementLocated(By.className(&apos;ajax_loader&apos;)))
+		driver_.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS)
+	}
+
+    	void moveTo(def field){
+    		driver_.executeScript(&quot;arguments[0].scrollIntoView(false);&quot;, field)
+    	}
+
+	def reGetControl(String controlID){
+		driverWait_.until(ExpectedConditions.visibilityOfElementLocated(By.id(controlID)))
+    		def field = driver_.findElement(By.id(controlID))
+    		moveTo(field)
+    		return field
+	}
+
+    	def preCtrl(String controlID){
+		driver_.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS)
+    		driverWait_.until(ExpectedConditions.visibilityOfElementLocated(By.id(controlID)))
+    		def field = driver_.findElement(By.id(controlID))
+    		moveTo(field)
+		/* Subsample time */
+    		waitActive()
+    		return field
+    	}
+
+	
+    void selectCtrl(String controlID){
+	   def field = preCtrl(controlID)
+        def select = new Select(field)
+        select.selectByVisibleText(xls_.getStringDataRecord(controlID))
+    }
+
+	void textCtrl(String controlID){
+	   def field = preCtrl(controlID)
+        field.click()
+        field.sendKeys(xls_.getStringDataRecord(controlID))
+    }
+
+    void dateCtrl(String controlID){
+    	   def field = preCtrl(controlID)
+        field.click()
+	   field.sendKeys(xls_.getStringDataRecord(controlID))
+	   field.sendKeys(Keys.TAB)
+    }
+
+    void radioButtonCtrl(){}
+    
+    void checkBoxCtrl(){}
+    
+    void buttonCtrl(String controlID){
+    	    def field = preCtrl(controlID)
+    	   
+	    def attempt = 0
+	    def noAttempts = 15	    
+	    def exceptionFlag = false
+	
+	    driver_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
+	    while (attempt &lt; noAttempts) {
+	        try {
+	            exceptionFlag = false
+	        	  field.click()
+	        } catch (Exception err) {
+	            exceptionFlag = true
+	            attempt++
+	            field = reGetControl(controlID)
+	        } finally {
+	            if (!exceptionFlag) attempt = noAttempts
+	        }
+	    }
+    }
+    
+}
+
+def driver = vars.getObject(&quot;DRIVER&quot;)
+def driverWait = vars.getObject(&quot;DRIVER_WAIT&quot;)
+DataPoolExtractor xls = new DataPoolExtractor(&quot;C:\\Users\\c22466a\\Documents\\Diploma\\tc-pco-create-app.xls&quot;)
+xls.sheetLoader(&quot;MY_INPUTS&quot;)
+xls.controlsListLoader(&quot;Field&quot;)
+xls.customerLoader(&quot;TC1&quot;)
+
+ControlManager ctrlManager = new ControlManager(driver, driverWait, xls)
+
+vars.putObject(&quot;CTRL_MANAGER&quot;, ctrlManager)
+
 </stringProp>
           </JSR223PreProcessor>
           <hashTree/>
