@@ -29,11 +29,18 @@ driver.findElement(By.id("IDToken1")).sendKeys(myXls.getStringDataRecord("IDToke
 driver.findElement(By.id("IDToken2")).click()
 driver.findElement(By.id("IDToken2")).sendKeys(myXls.getStringDataRecord("IDToken2"))
 
+driver.executeScript("arguments[0].scrollIntoView(false);", field)
+
+
+def timeStamp = result.timeStamp
 result.sampleStart()
 driver.findElement(By.name("Login.Submit")).click()
 driverWait.until(ExpectedConditions.elementToBeClickable(By.xpath("//ul[@id='menu']/li[2]"))) // waiting when homepage will be load
 result.sampleEnd()
 
+def subResult = new SampleResult(timeStamp, result.endTime - result.startTime)
+
+result.addRawSubResult(subResult)
 log.info("Login's time: ${(result.endTime - result.startTime) / 1000} seconds")
 
 log.info("=== End ===")

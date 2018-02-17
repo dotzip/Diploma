@@ -1,4 +1,5 @@
 import org.openqa.selenium.By
+import org.openqa.selenium.Keys
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.ChromeDriver
 import org.apache.jmeter.samplers.SampleResult
@@ -20,20 +21,7 @@ driver.findElement(By.xpath("//ul[@id='menu']/li[2]/ul/li[1]")).click()
 
 //SELECT
 Select productSelect = new Select(driver.findElement(By.id("ApplicationTypeRbg")))
-switch(myXls.getStringDataRecord("ApplicationTypeRbg")) {
-    case "Credit Card" :
-        productSelect.selectByValue("C")
-        break
-    case "Mortgage" :
-        productSelect.selectByValue("M")
-        break
-    case "Personal Loan" :
-        productSelect.selectByValue("P")
-        break
-    case "Instant Loan" :
-        productSelect.selectByValue("I")
-        break
-}
+productSelect.selectByVisibleText(myXls.getStringDataRecord("ApplicationTypeRbg"))
 //TEXT FIELD
 driver.findElement(By.id("SurnameTxt")).click()
 driver.findElement(By.id("SurnameTxt")).sendKeys(myXls.getStringDataRecord("SurnameTxt"))
@@ -42,7 +30,7 @@ driver.findElement(By.id("ForenameTxt")).sendKeys(myXls.getStringDataRecord("For
 //DATE
 driver.findElement(By.id("id2b")).click()
 driver.findElement(By.id("id2b")).sendKeys(myXls.getStringDataRecord("id2b"))
-driver.findElement(By.id("datepicker")).click()
+driver.findElement(By.id("id2b")).sendKeys(Keys.TAB)
 //TEXT
 driver.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
 driverWait.until(ExpectedConditions.invisibilityOfElementLocated(By.className('ajax_loader')))
@@ -50,9 +38,3 @@ driverWait.until(ExpectedConditions.elementToBeClickable(By.id("identificationCa
 driver.findElement(By.id("identificationCardNo")).click()
 driver.findElement(By.id("identificationCardNo")).sendKeys(myXls.getStringDataRecord("identificationCardNo"))
 driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS)
-
-
-//log.info("======= DEBUG: ${myXls.getStringDataRecord("SurnameTxt")} =======")
-//log.info("======= DEBUG: ${myXls.getDateDataRecord("id-DOBDate hasDatepicker")} =======")
-//log.info("======= DEBUG: ${myXls.getNumberDataRecord("HomePhoneNumberTxt")} =======")
-//log.info("======= DEBUG: ${myXls.getStringDataRecord("CountryDDL")} =======")

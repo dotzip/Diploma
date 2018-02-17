@@ -31,6 +31,7 @@
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
           <stringProp name="script">import org.openqa.selenium.By
+import org.openqa.selenium.Keys
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.ChromeDriver
 import org.apache.jmeter.samplers.SampleResult
@@ -52,20 +53,7 @@ driver.findElement(By.xpath(&quot;//ul[@id=&apos;menu&apos;]/li[2]/ul/li[1]&quot
 
 //SELECT
 Select productSelect = new Select(driver.findElement(By.id(&quot;ApplicationTypeRbg&quot;)))
-switch(myXls.getStringDataRecord(&quot;ApplicationTypeRbg&quot;)) {
-	case &quot;Credit Card&quot; :
-		productSelect.selectByValue(&quot;C&quot;)
-		break
-	case &quot;Mortgage&quot; :
-		productSelect.selectByValue(&quot;M&quot;)
-		break
-	case &quot;Personal Loan&quot; :
-		productSelect.selectByValue(&quot;P&quot;)
-		break
-	case &quot;Instant Loan&quot; :
-		productSelect.selectByValue(&quot;I&quot;)
-		break
-}
+productSelect.selectByVisibleText(myXls.getStringDataRecord(&quot;ApplicationTypeRbg&quot;))
 //TEXT FIELD
 driver.findElement(By.id(&quot;SurnameTxt&quot;)).click()
 driver.findElement(By.id(&quot;SurnameTxt&quot;)).sendKeys(myXls.getStringDataRecord(&quot;SurnameTxt&quot;))
@@ -74,7 +62,7 @@ driver.findElement(By.id(&quot;ForenameTxt&quot;)).sendKeys(myXls.getStringDataR
 //DATE
 driver.findElement(By.id(&quot;id2b&quot;)).click()
 driver.findElement(By.id(&quot;id2b&quot;)).sendKeys(myXls.getStringDataRecord(&quot;id2b&quot;))
-driver.findElement(By.id(&quot;datepicker&quot;)).click()
+driver.findElement(By.id(&quot;id2b&quot;)).sendKeys(Keys.TAB)
 //TEXT
 driver.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
 driverWait.until(ExpectedConditions.invisibilityOfElementLocated(By.className(&apos;ajax_loader&apos;)))
@@ -100,7 +88,7 @@ driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS)
 import org.apache.poi.hssf.usermodel.HSSFSheet
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 
-class DataPoolExtractor {
+class com.experian.DataPoolExtractor {
     private String dataPoolFilePath_
     private HSSFWorkbook workbook_
     private HSSFSheet sheet_
@@ -108,7 +96,7 @@ class DataPoolExtractor {
     private int controlsListIndex_
 
 
-    DataPoolExtractor(String dataPoolFilePath){
+    com.experian.DataPoolExtractor(String dataPoolFilePath){
         this.dataPoolFilePath_ = dataPoolFilePath
         this.workbook_ = new HSSFWorkbook(new FileInputStream(dataPoolFilePath_))
     }
@@ -182,12 +170,12 @@ class DataPoolExtractor {
 }
 
 
-DataPoolExtractor xls1 = new DataPoolExtractor(&quot;C:\\Users\\c22466a\\Documents\\Diploma\\tc-pco-create-app.xls&quot;)
+com.experian.DataPoolExtractor xls1 = new com.experian.DataPoolExtractor(&quot;C:\\Users\\c22466a\\Documents\\Diploma\\tc-pco-create-app.xls&quot;)
 xls1.sheetLoader(&quot;MY_INPUTS&quot;)
 xls1.controlsListLoader(&quot;Field&quot;)
 xls1.customerLoader(&quot;TC1&quot;)
 
-log.info(&quot;=== DataPoolExtractor ready! ===&quot;)
+log.info(&quot;=== com.experian.DataPoolExtractor ready! ===&quot;)
 
 vars.putObject(&quot;XLS1&quot;, xls1)
 </stringProp>
