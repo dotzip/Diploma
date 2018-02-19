@@ -13,6 +13,7 @@ class ControlManager {
     private WebDriverWait driverWait_
     private WebDriver driver_
     private DataPoolExtractor xls_
+    private final int noAttempts = 15
 
     ControlManager(WebDriver driver, WebDriverWait driverWait, DataPoolExtractor xls){
         this.driverWait_ = driverWait
@@ -26,14 +27,14 @@ class ControlManager {
         driver_.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS)
     }
 
-    void moveTo(def field){
-        driver_.executeScript("arguments[0].scrollIntoView(false);", field)
+    void moveTo(def field, boolean scroll){
+        driver_.executeScript("arguments[0].scrollIntoView($scroll);", field)
     }
 
     def reGetControl(String controlID){
         driverWait_.until(ExpectedConditions.visibilityOfElementLocated(By.id(controlID)))
         def field = driver_.findElement(By.id(controlID))
-        moveTo(field)
+        moveTo(field, true)
         return field
     }
 
@@ -41,7 +42,7 @@ class ControlManager {
         driver_.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS)
         driverWait_.until(ExpectedConditions.visibilityOfElementLocated(By.id(controlID)))
         def field = driver_.findElement(By.id(controlID))
-        moveTo(field)
+        moveTo(field, false)
         /* Subsample time */
         waitActive()
         return field
@@ -51,20 +52,69 @@ class ControlManager {
     void selectCtrl(String controlID){
         def field = preCtrl(controlID)
         def select = new Select(field)
-        select.selectByVisibleText(xls_.getStringDataRecord(controlID))
+
+        def attempt = 0
+        def exceptionFlag = false
+
+        driver_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
+        while (attempt < noAttempts) {
+            try {
+                exceptionFlag = false
+                select.selectByVisibleText(xls_.getStringDataRecord(controlID))
+            } catch (Exception err) {
+                exceptionFlag = true
+                attempt++
+                field = reGetControl(controlID)
+                select = new Select(field)
+            } finally {
+                if (!exceptionFlag) attempt = noAttempts
+            }
+        }
     }
 
     void textCtrl(String controlID){
         def field = preCtrl(controlID)
-        field.click()
-        field.sendKeys(xls_.getStringDataRecord(controlID))
+
+        def attempt = 0
+        def exceptionFlag = false
+
+        driver_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
+        while (attempt < noAttempts) {
+            try {
+                exceptionFlag = false
+                field.click()
+                field.sendKeys(xls_.getStringDataRecord(controlID))
+            } catch (Exception err) {
+                exceptionFlag = true
+                attempt++
+                field = reGetControl(controlID)
+            } finally {
+                if (!exceptionFlag) attempt = noAttempts
+            }
+        }
     }
 
     void dateCtrl(String controlID){
         def field = preCtrl(controlID)
-        field.click()
-        field.sendKeys(xls_.getStringDataRecord(controlID))
-        field.sendKeys(Keys.TAB)
+
+        def attempt = 0
+        def exceptionFlag = false
+
+        driver_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
+        while (attempt < noAttempts) {
+            try {
+                exceptionFlag = false
+                field.click()
+                field.sendKeys(xls_.getStringDataRecord(controlID))
+                field.sendKeys(Keys.TAB)
+            } catch (Exception err) {
+                exceptionFlag = true
+                attempt++
+                field = reGetControl(controlID)
+            } finally {
+                if (!exceptionFlag) attempt = noAttempts
+            }
+        }
     }
 
     void radioButtonCtrl(){}
@@ -75,7 +125,6 @@ class ControlManager {
         def field = preCtrl(controlID)
 
         def attempt = 0
-        def noAttempts = 15
         def exceptionFlag = false
 
         driver_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
@@ -92,5 +141,4 @@ class ControlManager {
             }
         }
     }
-
 }
