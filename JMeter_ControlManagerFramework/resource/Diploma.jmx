@@ -58,7 +58,13 @@ ctrlManager.textCtrl(&quot;ForenameTxt&quot;)
 ctrlManager.dateCtrl(&quot;id2b&quot;)
 //TEXT
 ctrlManager.textCtrl(&quot;identificationCardNo&quot;)
+//RADIO
+ctrlManager.radioButtonCtrl(&quot;ProofOfAddressRbg&quot;)
+ctrlManager.radioButtonCtrl(&quot;ProofOfIncomeRbg&quot;)
+ctrlManager.radioButtonCtrl(&quot;PaymentProtectionRbg&quot;)
+//BUTTON
 ctrlManager.buttonCtrl(&quot;nav1Btn&quot;)
+
 
 </stringProp>
           <stringProp name="scriptLanguage">groovy</stringProp>
@@ -127,6 +133,7 @@ vars.putObject(&quot;DRIVER_WAIT&quot;, driverWait)
             <stringProp name="script">import org.openqa.selenium.By
 import org.openqa.selenium.Keys
 import org.openqa.selenium.WebDriver
+import org.openqa.selenium.StaleElementReferenceException
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.Select
 import org.openqa.selenium.support.ui.WebDriverWait
@@ -190,145 +197,188 @@ class ControlManager {
     private WebDriverWait driverWait_
     private WebDriver driver_
     private DataPoolExtractor xls_
-    private final int noAttempts = 15
+    private final int noAttempts_ = 15
+    private def log_
 
-    ControlManager(WebDriver driver, WebDriverWait driverWait, DataPoolExtractor xls){
+    ControlManager(WebDriver driver, WebDriverWait driverWait, DataPoolExtractor xls, def log){
         this.driverWait_ = driverWait
         this.driver_ = driver
         this.xls_ = xls
+        this.log_ = log
     }
 
-	void waitActive(){
-		driver_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
-	     driverWait_.until(ExpectedConditions.invisibilityOfElementLocated(By.className(&apos;ajax_loader&apos;)))
-		driver_.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS)
-	}
+    void waitActive(){
+        driver_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
+        driverWait_.until(ExpectedConditions.invisibilityOfElementLocated(By.className(&apos;ajax_loader&apos;)))
+        driver_.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS)
+    }
 
-    	void moveTo(def field, boolean scroll){
-    		driver_.executeScript(&quot;arguments[0].scrollIntoView($scroll);&quot;, field)
-    	}
+    void moveTo(def field, boolean scroll){
+        driver_.executeScript(&quot;arguments[0].scrollIntoView($scroll);&quot;, field)
+    }
 
-	def reGetControl(String controlID){
-		driverWait_.until(ExpectedConditions.visibilityOfElementLocated(By.id(controlID)))
-    		def field = driver_.findElement(By.id(controlID))
-    		moveTo(field, true)
-    		return field
-	}
+    def reGetControl(String controlID){
+        driverWait_.until(ExpectedConditions.visibilityOfElementLocated(By.id(controlID)))
+        def field = driver_.findElement(By.id(controlID))
+        moveTo(field, true)
+        return field
+    }
 
-    	def preCtrl(String controlID){
-		driver_.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS)
-    		driverWait_.until(ExpectedConditions.visibilityOfElementLocated(By.id(controlID)))
-    		def field = driver_.findElement(By.id(controlID))
-    		moveTo(field, false)
-		/* Subsample time */
-    		waitActive()
-    		return field
-    	}
+    def reGetControlXPath(String controlID, String controlXPath){
+        driverWait_.until(ExpectedConditions.visibilityOfElementLocated(By.id(controlID)))
+        def field = driver_.findElement(By.xpath(controlXPath))
+        moveTo(field, true)
+        return field
+    }
 
-	
+    def preCtrl(String controlID){
+        driver_.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS)
+        driverWait_.until(ExpectedConditions.visibilityOfElementLocated(By.id(controlID)))
+        def field = driver_.findElement(By.id(controlID))
+        moveTo(field, false)
+        /* Subsample time */
+        waitActive()
+        return field
+    }
+
+    def preCtrlXPath(String controlID, String controlXPath){
+        driver_.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS)
+        driverWait_.until(ExpectedConditions.visibilityOfElementLocated(By.id(controlID)))
+        def field = driver_.findElement(By.xpath(controlXPath))
+        moveTo(field, false)
+        /* Subsample time */
+        waitActive()
+        return field
+    }
+
     void selectCtrl(String controlID){
-	    def field = preCtrl(controlID)
-         def select = new Select(field)
-	    
-	    def attempt = 0
-	    def exceptionFlag = false
-	
-	    driver_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
-	    while (attempt &lt; noAttempts) {
-	        try {
-	            exceptionFlag = false
-	        	  select.selectByVisibleText(xls_.getStringDataRecord(controlID))
-	        } catch (Exception err) {
-	            exceptionFlag = true
-	            attempt++
-	            field = reGetControl(controlID)
-	            select = new Select(field)
-	        } finally {
-	            if (!exceptionFlag) attempt = noAttempts
-	        }
-	    }
+        log_.info(&quot;=== SELECT $controlID: ${xls_.getStringDataRecord(controlID)} ===&quot;)
+        def field = preCtrl(controlID)
+        def select = new Select(field)
+        def attempt = 0
+        def exceptionFlag = false
+
+        driver_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
+        while (attempt &lt; noAttempts_) {
+            try {
+                exceptionFlag = false
+                select.selectByVisibleText(xls_.getStringDataRecord(controlID))
+            } catch (Exception err) {
+                exceptionFlag = true
+                attempt++
+                log_.info(&quot;=== SELECT ATTEMPTS: $attempt ===&quot;)
+                field = reGetControl(controlID)
+                select = new Select(field)
+            } finally {
+                if (!exceptionFlag) attempt = noAttempts_
+            }
+        }
     }
 
-	void textCtrl(String controlID){
-	    def field = preCtrl(controlID)
-    	   
-	    def attempt = 0
-	    def exceptionFlag = false
-	
-	    driver_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
-	    while (attempt &lt; noAttempts) {
-	        try {
-	            exceptionFlag = false
-	        	  field.click()
-	        	  field.sendKeys(xls_.getStringDataRecord(controlID))
-	        } catch (Exception err) {
-	            exceptionFlag = true
-	            attempt++
-	            field = reGetControl(controlID)
-	        } finally {
-	            if (!exceptionFlag) attempt = noAttempts
-	        }
-	    }
+    void textCtrl(String controlID){
+        log_.info(&quot;=== TEXT $controlID: ${xls_.getStringDataRecord(controlID)} ===&quot;)
+        def field = preCtrl(controlID)
+        def attempt = 0
+        def exceptionFlag = false
+
+        driver_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
+        while (attempt &lt; noAttempts_) {
+            try {
+                exceptionFlag = false
+                field.click()
+                field.sendKeys(xls_.getStringDataRecord(controlID))
+            } catch (Exception err) {
+                exceptionFlag = true
+                attempt++
+                log_.info(&quot;=== TEXT ATTEMPTS: $attempt ===&quot;)
+                field = reGetControl(controlID)
+            } finally {
+                if (!exceptionFlag) attempt = noAttempts_
+            }
+        }
     }
 
     void dateCtrl(String controlID){
-    	    def field = preCtrl(controlID)
-    	   
-	    def attempt = 0
-	    def exceptionFlag = false
-	
-	    driver_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
-	    while (attempt &lt; noAttempts) {
-	        try {
-	            exceptionFlag = false
-	        	  field.click()
-	        	  field.sendKeys(xls_.getStringDataRecord(controlID))
-   			  field.sendKeys(Keys.TAB)
-	        } catch (Exception err) {
-	            exceptionFlag = true
-	            attempt++
-	            field = reGetControl(controlID)
-	        } finally {
-	            if (!exceptionFlag) attempt = noAttempts
-	        }
-	    }
+        log_.info(&quot;=== DATE $controlID: ${xls_.getStringDataRecord(controlID)} ===&quot;)
+        def field = preCtrl(controlID)
+        def attempt = 0
+        def exceptionFlag = false
+
+        driver_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
+        while (attempt &lt; noAttempts_) {
+            try {
+                exceptionFlag = false
+                field.click()
+                field.sendKeys(xls_.getStringDataRecord(controlID))
+                field.sendKeys(Keys.TAB)
+            } catch (Exception err) {
+                exceptionFlag = true
+                attempt++
+                log_.info(&quot;=== DATE ATTEMPTS: $attempt ===&quot;)
+                field = reGetControl(controlID)
+            } finally {
+                if (!exceptionFlag) attempt = noAttempts_
+            }
+        }
     }
 
-    void radioButtonCtrl(){}
-    
-    void checkBoxCtrl(){}
-    
-    void buttonCtrl(String controlID){
-    	    def field = preCtrl(controlID)
-    	   
-	    def attempt = 0    
-	    def exceptionFlag = false
-	
-	    driver_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
-	    while (attempt &lt; noAttempts) {
-	        try {
-	            exceptionFlag = false
-	        	  field.click()
-	        } catch (Exception err) {
-	            exceptionFlag = true
-	            attempt++
-	            field = reGetControl(controlID)
-	        } finally {
-	            if (!exceptionFlag) attempt = noAttempts
-	        }
-	    }
+    void radioButtonCtrl(String controlID){
+        log_.info(&quot;=== RADIO $controlID: ${xls_.getStringDataRecord(controlID)} ===&quot;)
+        if(xls_.getStringDataRecord(controlID) == &apos;Yes&apos;){
+            def field = preCtrlXPath(controlID, &quot;//div[@id=&apos;&quot;+controlID+&quot;&apos;]/*/label[text()=&apos;Yes&apos;]&quot;)
+            def attempt = 0
+            def exceptionFlag = false
+
+            driver_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
+            while (attempt &lt; noAttempts_) {
+                try {
+                    exceptionFlag = false
+                    field.click()
+                } catch (Exception err) {
+                    exceptionFlag = true
+                    attempt++
+                    log_.info(&quot;=== RADIO ATTEMPTS: $attempt ===&quot;)
+                    field = reGetControlXPath(controlID, &quot;//div[@id=&apos;&quot;+controlID+&quot;&apos;]/*/label[text()=&apos;Yes&apos;]&quot;)
+                } finally {
+                    if (!exceptionFlag) attempt = noAttempts_
+                }
+            }
+        }
     }
-    
+
+    void checkBoxCtrl(){}
+
+    void buttonCtrl(String controlID){
+        log_.info(&quot;=== BUTTON $controlID ===&quot;)
+        def field = preCtrl(controlID)
+        def attempt = 0
+        def exceptionFlag = false
+
+        driver_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
+        while (attempt &lt; noAttempts_) {
+            try {
+                exceptionFlag = false
+                field.click()
+            } catch (Exception err) {
+                exceptionFlag = true
+                attempt++
+                log_.info(&quot;=== BUTTON ATTEMPTS: $attempt ===&quot;)
+                field = reGetControl(controlID)
+            } finally {
+                if (!exceptionFlag) attempt = noAttempts_
+            }
+        }
+    }
 }
 
 def driver = vars.getObject(&quot;DRIVER&quot;)
 def driverWait = vars.getObject(&quot;DRIVER_WAIT&quot;)
-DataPoolExtractor xls = new DataPoolExtractor(&quot;C:\\Users\\c22466a\\Documents\\Diploma\\tc-pco-create-app.xls&quot;)
+DataPoolExtractor xls = new DataPoolExtractor(&quot;C:\\\Users\\\c22466a\\\Documents\\\Diploma\\\tc-pco-create-app.xls&quot;)
 xls.sheetLoader(&quot;MY_INPUTS&quot;)
 xls.controlsListLoader(&quot;Field&quot;)
 xls.customerLoader(&quot;TC1&quot;)
 
-ControlManager ctrlManager = new ControlManager(driver, driverWait, xls)
+ControlManager ctrlManager = new ControlManager(driver, driverWait, xls, log)
 
 vars.putObject(&quot;CTRL_MANAGER&quot;, ctrlManager)
 

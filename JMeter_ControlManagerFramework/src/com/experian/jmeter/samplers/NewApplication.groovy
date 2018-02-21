@@ -25,3 +25,9 @@ ctrlManager.textCtrl("ForenameTxt")
 ctrlManager.dateCtrl("id2b")
 //TEXT
 ctrlManager.textCtrl("identificationCardNo")
+//RADIO
+ctrlManager.radioButtonCtrl("ProofOfAddressRbg")
+ctrlManager.radioButtonCtrl("ProofOfIncomeRbg")
+ctrlManager.radioButtonCtrl("PaymentProtectionRbg")
+//BUTTON
+ctrlManager.buttonCtrl("nav1Btn")
