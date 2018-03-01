@@ -26,113 +26,66 @@
         <stringProp name="ThreadGroup.delay"></stringProp>
       </ThreadGroup>
       <hashTree>
-        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="New Application" enabled="true">
-          <stringProp name="cacheKey"></stringProp>
-          <stringProp name="filename"></stringProp>
-          <stringProp name="parameters"></stringProp>
-          <stringProp name="script">import org.openqa.selenium.By
-import org.openqa.selenium.Keys
-import org.openqa.selenium.WebDriver
-import org.openqa.selenium.chrome.ChromeDriver
-import org.apache.jmeter.samplers.SampleResult
-import org.openqa.selenium.support.ui.Select
+        <com.googlecode.jmeter.plugins.webdriver.config.ChromeDriverConfig guiclass="com.googlecode.jmeter.plugins.webdriver.config.gui.ChromeDriverConfigGui" testclass="com.googlecode.jmeter.plugins.webdriver.config.ChromeDriverConfig" testname="jp@gc - Chrome Driver Config" enabled="true">
+          <stringProp name="WebDriverConfig.proxy_type">SYSTEM</stringProp>
+          <stringProp name="WebDriverConfig.proxy_pac_url"></stringProp>
+          <stringProp name="WebDriverConfig.http_host"></stringProp>
+          <intProp name="WebDriverConfig.http_port">8080</intProp>
+          <boolProp name="WebDriverConfig.use_http_for_all_protocols">true</boolProp>
+          <stringProp name="WebDriverConfig.https_host"></stringProp>
+          <intProp name="WebDriverConfig.https_port">8080</intProp>
+          <stringProp name="WebDriverConfig.ftp_host"></stringProp>
+          <intProp name="WebDriverConfig.ftp_port">8080</intProp>
+          <stringProp name="WebDriverConfig.socks_host"></stringProp>
+          <intProp name="WebDriverConfig.socks_port">8080</intProp>
+          <stringProp name="WebDriverConfig.no_proxy">localhost</stringProp>
+          <boolProp name="WebDriverConfig.maximize_browser">false</boolProp>
+          <boolProp name="WebDriverConfig.reset_per_iteration">false</boolProp>
+          <boolProp name="WebDriverConfig.dev_mode">true</boolProp>
+          <stringProp name="ChromeDriverConfig.chromedriver_path">C:\Users\c22466a\Documents\Diploma\apache-jmeter-3.3\browser_drivers\chromedriver.exe</stringProp>
+          <boolProp name="ChromeDriverConfig.android_enabled">false</boolProp>
+        </com.googlecode.jmeter.plugins.webdriver.config.ChromeDriverConfig>
+        <hashTree/>
+        <com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler guiclass="com.googlecode.jmeter.plugins.webdriver.sampler.gui.WebDriverSamplerGui" testclass="com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler" testname="Login WebDriver Sampler" enabled="true">
+          <stringProp name="WebDriverSampler.script">import org.openqa.selenium.By
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
-import java.util.concurrent.TimeUnit
+import org.apache.jmeter.threads.JMeterContextService
 
-def ctrlManager = vars.getObject(&quot;CTRL_MANAGER&quot;)
-def driver = vars.getObject(&quot;DRIVER&quot;)
-
-//New application
-driver.findElement(By.xpath(&quot;//ul[@id=&apos;menu&apos;]/li[2]&quot;)).click()
-driver.findElement(By.xpath(&quot;//ul[@id=&apos;menu&apos;]/li[2]/ul/li[1]&quot;)).click()
-
-/*Fill data*/
-
-//SELECT
-ctrlManager.selectCtrl(&quot;ApplicationTypeRbg&quot;)
-//TEXT FIELD
-ctrlManager.textCtrl(&quot;SurnameTxt&quot;)
-ctrlManager.textCtrl(&quot;ForenameTxt&quot;)
-//DATE
-ctrlManager.dateCtrl(&quot;id2b&quot;)
-//TEXT
-ctrlManager.textCtrl(&quot;identificationCardNo&quot;)
-//RADIO
-ctrlManager.radioButtonCtrl(&quot;ProofOfAddressRbg&quot;)
-ctrlManager.radioButtonCtrl(&quot;ProofOfIncomeRbg&quot;)
-ctrlManager.radioButtonCtrl(&quot;PaymentProtectionRbg&quot;)
-//BUTTON
-ctrlManager.buttonCtrl(&quot;nav1Btn&quot;)
-
-
-</stringProp>
-          <stringProp name="scriptLanguage">groovy</stringProp>
-        </JSR223Sampler>
-        <hashTree>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Login PreProcessor" enabled="true">
-            <stringProp name="scriptLanguage">groovy</stringProp>
-            <stringProp name="parameters"></stringProp>
-            <stringProp name="filename"></stringProp>
-            <stringProp name="cacheKey"></stringProp>
-            <stringProp name="script">import org.openqa.selenium.By
-import org.openqa.selenium.WebDriver
-import org.openqa.selenium.chrome.ChromeDriver
-import org.apache.jmeter.samplers.SampleResult
-import org.openqa.selenium.support.ui.ExpectedConditions
-import org.openqa.selenium.support.ui.WebDriverWait
-import java.util.concurrent.TimeUnit
-
-/**
- * @System.setProperty for browser
- * @WebDriver object for browser management
- * @SampleResult for timestamps
- */
-
-System.setProperty(&quot;webdriver.chrome.driver&quot;, &quot;C:\\\Users\\\c22466a\\\Documents\\\Diploma\\\apache-jmeter-3.3\\\browser_drivers\\\chromedriver.exe&quot;)
-
-WebDriver driver = new ChromeDriver()
-SampleResult result = new SampleResult()
-WebDriverWait driverWait = new WebDriverWait(driver, 60)
-
-driver.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS)
-
-log.info(&quot;=== Login sampler ===&quot;)
-
-driver.get(&quot;http://sso.experian.local:8080/sso/UI/Login?realm=TENANT1&quot;)
-driver.findElement(By.id(&quot;IDToken1&quot;)).click()
-driver.findElement(By.id(&quot;IDToken1&quot;)).sendKeys(&quot;john&quot;)
-driver.findElement(By.id(&quot;IDToken2&quot;)).click()
-driver.findElement(By.id(&quot;IDToken2&quot;)).sendKeys(&quot;Admin123!&quot;)
-
-def timeStamp = result.timeStamp
-result.sampleStart()
-driver.findElement(By.name(&quot;Login.Submit&quot;)).click()
-driverWait.until(ExpectedConditions.elementToBeClickable(By.xpath(&quot;//ul[@id=&apos;menu&apos;]/li[2]&quot;))) // waiting when homepage will be load
-result.sampleEnd()
-
-def subResult = new SampleResult(timeStamp, result.endTime - result.startTime)
-subResult.setSampleLabel(&quot;TIME LOADING LOGIN PAGE&quot;)
-result.addRawSubResult(subResult)
-
-log.info(&quot;Login&apos;s time: ${(result.endTime - result.startTime) / 1000} seconds&quot;)
-
-log.info(&quot;=== End ===&quot;)
-
-vars.putObject(&quot;DRIVER&quot;, driver)
-vars.putObject(&quot;RESULT&quot;, result)
+def vars = JMeterContextService.getContext().getVariables()
+// Waiting for driver initialize
+WebDriverWait driverWait = new WebDriverWait(WDS.browser, 60)
 vars.putObject(&quot;DRIVER_WAIT&quot;, driverWait)
+//System properties for browser driver
+System.setProperty(&quot;webdriver.chrome.driver&quot;, &quot;C:\\Users\\c22466a\\Documents\\Diploma\\apache-jmeter-3.3\\browser_drivers\\chromedriver.exe&quot;)
+
+WDS.log.info(&apos;Login&apos;)
+WDS.sampleResult.subSampleStart(&apos;&gt;&gt;&gt; Get page&apos;)
+WDS.browser.get(&quot;http://sso.experian.local:8080/sso/UI/Login?realm=TENANT1&quot;)
+WDS.sampleResult.subSampleEnd(true)
+
+WDS.browser.findElement(By.id(&quot;IDToken1&quot;)).click()
+WDS.browser.findElement(By.id(&quot;IDToken1&quot;)).sendKeys(&quot;john&quot;)
+WDS.browser.findElement(By.id(&quot;IDToken2&quot;)).click()
+WDS.browser.findElement(By.id(&quot;IDToken2&quot;)).sendKeys(&quot;Admin123!&quot;)
+
+WDS.sampleResult.subSampleStart(&apos;&gt;&gt;&gt; Login&apos;)
+WDS.browser.findElement(By.name(&quot;Login.Submit&quot;)).click()
+driverWait.until(ExpectedConditions.elementToBeClickable(By.xpath(&quot;//ul[@id=&apos;menu&apos;]/li[2]&quot;))) // waiting when homepage will be load
+WDS.sampleResult.subSampleEnd(true)
+
+WDS.sampleResult.subSampleStart(&apos;&gt;&gt;&gt; New App&apos;)
+WDS.browser.findElement(By.xpath(&quot;//ul[@id=&apos;menu&apos;]/li[2]&quot;)).click()
+WDS.browser.findElement(By.xpath(&quot;//ul[@id=&apos;menu&apos;]/li[2]/ul/li[1]&quot;)).click()
+WDS.sampleResult.subSampleEnd(true)
 </stringProp>
-          </JSR223PreProcessor>
-          <hashTree/>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Control Manager PreProcessor" enabled="true">
-            <stringProp name="scriptLanguage">groovy</stringProp>
-            <stringProp name="parameters"></stringProp>
-            <stringProp name="filename"></stringProp>
-            <stringProp name="cacheKey"></stringProp>
-            <stringProp name="script">import org.openqa.selenium.By
+          <stringProp name="WebDriverSampler.parameters"></stringProp>
+          <stringProp name="WebDriverSampler.language">groovy</stringProp>
+        </com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler>
+        <hashTree/>
+        <com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler guiclass="com.googlecode.jmeter.plugins.webdriver.sampler.gui.WebDriverSamplerGui" testclass="com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler" testname="Control Manager Framework WebDriver Sampler" enabled="true">
+          <stringProp name="WebDriverSampler.script">import org.openqa.selenium.By
 import org.openqa.selenium.Keys
-import org.openqa.selenium.WebDriver
 import org.openqa.selenium.StaleElementReferenceException
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.Select
@@ -141,6 +94,7 @@ import org.apache.poi.hssf.usermodel.HSSFRow
 import org.apache.poi.hssf.usermodel.HSSFSheet
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import java.util.concurrent.TimeUnit
+import org.apache.jmeter.threads.JMeterContextService
 
 class DataPoolExtractor {
     private String dataPoolFilePath_
@@ -195,58 +149,64 @@ class DataPoolExtractor {
 
 class ControlManager {
     private WebDriverWait driverWait_
-    private WebDriver driver_
     private DataPoolExtractor xls_
-    private final int noAttempts_ = 15
+    private def browser_
     private def log_
+    private def sampleResult_
+    private final int noAttempts_ = 15
 
-    ControlManager(WebDriver driver, WebDriverWait driverWait, DataPoolExtractor xls, def log){
+    ControlManager(WebDriverWait driverWait, DataPoolExtractor xls, def browser, def log, def sampleResult){
         this.driverWait_ = driverWait
-        this.driver_ = driver
         this.xls_ = xls
+        this.browser_ = browser
         this.log_ = log
+        this.sampleResult_ = sampleResult
     }
 
     void waitActive(){
-        driver_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
+        browser_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
         driverWait_.until(ExpectedConditions.invisibilityOfElementLocated(By.className(&apos;ajax_loader&apos;)))
-        driver_.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS)
+        browser_.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS)
     }
 
     void moveTo(def field, boolean scroll){
-        driver_.executeScript(&quot;arguments[0].scrollIntoView($scroll);&quot;, field)
+        browser_.executeScript(&quot;arguments[0].scrollIntoView($scroll);&quot;, field)
     }
 
     def reGetControl(String controlID){
         driverWait_.until(ExpectedConditions.visibilityOfElementLocated(By.id(controlID)))
-        def field = driver_.findElement(By.id(controlID))
+        def field = browser_.findElement(By.id(controlID))
         moveTo(field, true)
+        sampleResult_.subSampleStart(&quot;&gt;&gt;&gt; $controlID time&quot;)
         return field
     }
 
     def reGetControlXPath(String controlID, String controlXPath){
         driverWait_.until(ExpectedConditions.visibilityOfElementLocated(By.id(controlID)))
-        def field = driver_.findElement(By.xpath(controlXPath))
+        def field = browser_.findElement(By.xpath(controlXPath))
         moveTo(field, true)
+        sampleResult_.subSampleStart(&quot;&gt;&gt;&gt; $controlID time&quot;)
         return field
     }
 
     def preCtrl(String controlID){
-        driver_.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS)
+        browser_.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS)
         driverWait_.until(ExpectedConditions.visibilityOfElementLocated(By.id(controlID)))
-        def field = driver_.findElement(By.id(controlID))
+        def field = browser_.findElement(By.id(controlID))
         moveTo(field, false)
         /* Subsample time */
+        sampleResult_.subSampleStart(&quot;&gt;&gt;&gt; $controlID time&quot;)
         waitActive()
         return field
     }
 
     def preCtrlXPath(String controlID, String controlXPath){
-        driver_.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS)
+        browser_.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS)
         driverWait_.until(ExpectedConditions.visibilityOfElementLocated(By.id(controlID)))
-        def field = driver_.findElement(By.xpath(controlXPath))
+        def field = browser_.findElement(By.xpath(controlXPath))
         moveTo(field, false)
         /* Subsample time */
+        sampleResult_.subSampleStart(&quot;&gt;&gt;&gt; $controlID time&quot;)
         waitActive()
         return field
     }
@@ -258,7 +218,7 @@ class ControlManager {
         def attempt = 0
         def exceptionFlag = false
 
-        driver_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
+        browser_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
         while (attempt &lt; noAttempts_) {
             try {
                 exceptionFlag = false
@@ -266,13 +226,14 @@ class ControlManager {
             } catch (Exception err) {
                 exceptionFlag = true
                 attempt++
-                log_.info(&quot;=== SELECT ATTEMPTS: $attempt ===&quot;)
+                log_.info(&quot;=== $controlID ATTEMPTS: $attempt ===&quot;)
                 field = reGetControl(controlID)
                 select = new Select(field)
             } finally {
                 if (!exceptionFlag) attempt = noAttempts_
             }
         }
+        sampleResult_.subSampleEnd(true)
     }
 
     void textCtrl(String controlID){
@@ -281,7 +242,7 @@ class ControlManager {
         def attempt = 0
         def exceptionFlag = false
 
-        driver_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
+        browser_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
         while (attempt &lt; noAttempts_) {
             try {
                 exceptionFlag = false
@@ -290,12 +251,13 @@ class ControlManager {
             } catch (Exception err) {
                 exceptionFlag = true
                 attempt++
-                log_.info(&quot;=== TEXT ATTEMPTS: $attempt ===&quot;)
+                log_.info(&quot;=== $controlID ATTEMPTS: $attempt ===&quot;)
                 field = reGetControl(controlID)
             } finally {
                 if (!exceptionFlag) attempt = noAttempts_
             }
         }
+        sampleResult_.subSampleEnd(true)
     }
 
     void dateCtrl(String controlID){
@@ -304,7 +266,7 @@ class ControlManager {
         def attempt = 0
         def exceptionFlag = false
 
-        driver_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
+        browser_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
         while (attempt &lt; noAttempts_) {
             try {
                 exceptionFlag = false
@@ -314,12 +276,13 @@ class ControlManager {
             } catch (Exception err) {
                 exceptionFlag = true
                 attempt++
-                log_.info(&quot;=== DATE ATTEMPTS: $attempt ===&quot;)
+                log_.info(&quot;&gt;&gt;&gt; $controlID ATTEMPTS: $attempt&quot;)
                 field = reGetControl(controlID)
             } finally {
                 if (!exceptionFlag) attempt = noAttempts_
             }
         }
+        sampleResult_.subSampleEnd(true)
     }
 
     void radioButtonCtrl(String controlID){
@@ -329,7 +292,7 @@ class ControlManager {
             def attempt = 0
             def exceptionFlag = false
 
-            driver_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
+            browser_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
             while (attempt &lt; noAttempts_) {
                 try {
                     exceptionFlag = false
@@ -337,13 +300,14 @@ class ControlManager {
                 } catch (Exception err) {
                     exceptionFlag = true
                     attempt++
-                    log_.info(&quot;=== RADIO ATTEMPTS: $attempt ===&quot;)
+                    log_.info(&quot;&gt;&gt;&gt; $controlID ATTEMPTS: $attempt&quot;)
                     field = reGetControlXPath(controlID, &quot;//div[@id=&apos;&quot;+controlID+&quot;&apos;]/*/label[text()=&apos;Yes&apos;]&quot;)
                 } finally {
                     if (!exceptionFlag) attempt = noAttempts_
                 }
             }
         }
+        sampleResult_.subSampleEnd(true)
     }
 
     void checkBoxCtrl(){}
@@ -354,7 +318,7 @@ class ControlManager {
         def attempt = 0
         def exceptionFlag = false
 
-        driver_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
+        browser_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
         while (attempt &lt; noAttempts_) {
             try {
                 exceptionFlag = false
@@ -362,30 +326,85 @@ class ControlManager {
             } catch (Exception err) {
                 exceptionFlag = true
                 attempt++
-                log_.info(&quot;=== BUTTON ATTEMPTS: $attempt ===&quot;)
+                log_.info(&quot;=== $controlID ATTEMPTS: $attempt ===&quot;)
                 field = reGetControl(controlID)
             } finally {
                 if (!exceptionFlag) attempt = noAttempts_
             }
         }
+        sampleResult_.subSampleEnd(true)
     }
 }
 
-def driver = vars.getObject(&quot;DRIVER&quot;)
+//vars initialize
+def vars = JMeterContextService.getContext().getVariables()
 def driverWait = vars.getObject(&quot;DRIVER_WAIT&quot;)
+
+//Data pool extractor initialize
 DataPoolExtractor xls = new DataPoolExtractor(&quot;C:\\\Users\\\c22466a\\\Documents\\\Diploma\\\tc-pco-create-app.xls&quot;)
 xls.sheetLoader(&quot;MY_INPUTS&quot;)
 xls.controlsListLoader(&quot;Field&quot;)
 xls.customerLoader(&quot;TC1&quot;)
 
-ControlManager ctrlManager = new ControlManager(driver, driverWait, xls, log)
+//Control manager initialize
+ControlManager ctrlManager = new ControlManager(driverWait, xls, WDS.browser, WDS.log, WDS.sampleResult)
 
-vars.putObject(&quot;CTRL_MANAGER&quot;, ctrlManager)
 
-</stringProp>
-          </JSR223PreProcessor>
-          <hashTree/>
-        </hashTree>
+//SELECT
+ctrlManager.selectCtrl(&quot;ApplicationTypeRbg&quot;)
+//TEXT FIELD
+ctrlManager.textCtrl(&quot;SurnameTxt&quot;)
+ctrlManager.textCtrl(&quot;ForenameTxt&quot;)
+//DATE
+ctrlManager.dateCtrl(&quot;id2b&quot;)
+//TEXT
+ctrlManager.textCtrl(&quot;identificationCardNo&quot;)
+//RADIO
+ctrlManager.radioButtonCtrl(&quot;ProofOfAddressRbg&quot;)
+ctrlManager.radioButtonCtrl(&quot;ProofOfIncomeRbg&quot;)
+ctrlManager.radioButtonCtrl(&quot;PaymentProtectionRbg&quot;)
+//BUTTON
+ctrlManager.buttonCtrl(&quot;nav1Btn&quot;)</stringProp>
+          <stringProp name="WebDriverSampler.parameters"></stringProp>
+          <stringProp name="WebDriverSampler.language">groovy</stringProp>
+        </com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler>
+        <hashTree/>
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
         <ResultCollector guiclass="TableVisualizer" testclass="ResultCollector" testname="View Results in Table" enabled="true">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
@@ -421,6 +440,16 @@ vars.putObject(&quot;CTRL_MANAGER&quot;, ctrlManager)
           </objProp>
           <stringProp name="filename"></stringProp>
         </ResultCollector>
+        <hashTree/>
+        <CookieManager guiclass="CookiePanel" testclass="CookieManager" testname="HTTP Cookie Manager" enabled="true">
+          <collectionProp name="CookieManager.cookies"/>
+          <boolProp name="CookieManager.clearEachIteration">true</boolProp>
+        </CookieManager>
+        <hashTree/>
+        <CacheManager guiclass="CacheManagerGui" testclass="CacheManager" testname="HTTP Cache Manager" enabled="true">
+          <boolProp name="clearEachIteration">true</boolProp>
+          <boolProp name="useExpires">false</boolProp>
+        </CacheManager>
         <hashTree/>
       </hashTree>
     </hashTree>

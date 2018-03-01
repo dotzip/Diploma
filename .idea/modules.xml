@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$//JMeter_ControlManager.iml" filepath="$PROJECT_DIR$//JMeter_ControlManager.iml" />
       <module fileurl="file://$PROJECT_DIR$/JMeter_ControlManagerFramework/JMeter_ControlManagerFramework.iml" filepath="$PROJECT_DIR$/JMeter_ControlManagerFramework/JMeter_ControlManagerFramework.iml" />
     </modules>
   </component>

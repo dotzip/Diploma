@@ -1,67 +1,69 @@
-package com.experian.jmeter.framework
-
-import org.openqa.selenium.By
-import org.openqa.selenium.Keys
-import org.openqa.selenium.WebDriver
-import org.openqa.selenium.support.ui.ExpectedConditions
+import com.experian.jmeter.framework.DataPoolExtractor
 import org.openqa.selenium.support.ui.Select
 import org.openqa.selenium.support.ui.WebDriverWait
+
 import java.util.concurrent.TimeUnit
 
 class ControlManager {
     private WebDriverWait driverWait_
-    private WebDriver driver_
     private DataPoolExtractor xls_
-    private final int noAttempts_ = 15
+    private def browser_
     private def log_
+    private def sampleResult_
+    private final int noAttempts_ = 15
 
-    ControlManager(WebDriver driver, WebDriverWait driverWait, DataPoolExtractor xls, def log){
+    ControlManager(WebDriverWait driverWait, DataPoolExtractor xls, def browser, def log, def sampleResult){
         this.driverWait_ = driverWait
-        this.driver_ = driver
         this.xls_ = xls
+        this.browser_ = browser
         this.log_ = log
+        this.sampleResult_ = sampleResult
     }
 
     void waitActive(){
-        driver_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
+        browser_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
         driverWait_.until(ExpectedConditions.invisibilityOfElementLocated(By.className('ajax_loader')))
-        driver_.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS)
+        browser_.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS)
     }
 
     void moveTo(def field, boolean scroll){
-        driver_.executeScript("arguments[0].scrollIntoView($scroll);", field)
+        browser_.executeScript("arguments[0].scrollIntoView($scroll);", field)
     }
 
     def reGetControl(String controlID){
         driverWait_.until(ExpectedConditions.visibilityOfElementLocated(By.id(controlID)))
-        def field = driver_.findElement(By.id(controlID))
+        def field = browser_.findElement(By.id(controlID))
         moveTo(field, true)
+        sampleResult_.subSampleStart(">>> $controlID time")
         return field
     }
 
     def reGetControlXPath(String controlID, String controlXPath){
         driverWait_.until(ExpectedConditions.visibilityOfElementLocated(By.id(controlID)))
-        def field = driver_.findElement(By.xpath(controlXPath))
+        def field = browser_.findElement(By.xpath(controlXPath))
         moveTo(field, true)
+        sampleResult_.subSampleStart(">>> $controlID time")
         return field
     }
 
     def preCtrl(String controlID){
-        driver_.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS)
+        browser_.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS)
         driverWait_.until(ExpectedConditions.visibilityOfElementLocated(By.id(controlID)))
-        def field = driver_.findElement(By.id(controlID))
+        def field = browser_.findElement(By.id(controlID))
         moveTo(field, false)
         /* Subsample time */
+        sampleResult_.subSampleStart(">>> $controlID time")
         waitActive()
         return field
     }
 
     def preCtrlXPath(String controlID, String controlXPath){
-        driver_.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS)
+        browser_.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS)
         driverWait_.until(ExpectedConditions.visibilityOfElementLocated(By.id(controlID)))
-        def field = driver_.findElement(By.xpath(controlXPath))
+        def field = browser_.findElement(By.xpath(controlXPath))
         moveTo(field, false)
         /* Subsample time */
+        sampleResult_.subSampleStart(">>> $controlID time")
         waitActive()
         return field
     }
@@ -73,7 +75,7 @@ class ControlManager {
         def attempt = 0
         def exceptionFlag = false
 
-        driver_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
+        browser_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
         while (attempt < noAttempts_) {
             try {
                 exceptionFlag = false
@@ -81,13 +83,14 @@ class ControlManager {
             } catch (Exception err) {
                 exceptionFlag = true
                 attempt++
-                log_.info("=== SELECT ATTEMPTS: $attempt ===")
+                log_.info("=== $controlID ATTEMPTS: $attempt ===")
                 field = reGetControl(controlID)
                 select = new Select(field)
             } finally {
                 if (!exceptionFlag) attempt = noAttempts_
             }
         }
+        sampleResult_.subSampleEnd(true)
     }
 
     void textCtrl(String controlID){
@@ -96,7 +99,7 @@ class ControlManager {
         def attempt = 0
         def exceptionFlag = false
 
-        driver_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
+        browser_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
         while (attempt < noAttempts_) {
             try {
                 exceptionFlag = false
@@ -105,12 +108,13 @@ class ControlManager {
             } catch (Exception err) {
                 exceptionFlag = true
                 attempt++
-                log_.info("=== TEXT ATTEMPTS: $attempt ===")
+                log_.info("=== $controlID ATTEMPTS: $attempt ===")
                 field = reGetControl(controlID)
             } finally {
                 if (!exceptionFlag) attempt = noAttempts_
             }
         }
+        sampleResult_.subSampleEnd(true)
     }
 
     void dateCtrl(String controlID){
@@ -119,7 +123,7 @@ class ControlManager {
         def attempt = 0
         def exceptionFlag = false
 
-        driver_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
+        browser_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
         while (attempt < noAttempts_) {
             try {
                 exceptionFlag = false
@@ -129,12 +133,13 @@ class ControlManager {
             } catch (Exception err) {
                 exceptionFlag = true
                 attempt++
-                log_.info("=== DATE ATTEMPTS: $attempt ===")
+                log_.info(">>> $controlID ATTEMPTS: $attempt")
                 field = reGetControl(controlID)
             } finally {
                 if (!exceptionFlag) attempt = noAttempts_
             }
         }
+        sampleResult_.subSampleEnd(true)
     }
 
     void radioButtonCtrl(String controlID){
@@ -144,7 +149,7 @@ class ControlManager {
             def attempt = 0
             def exceptionFlag = false
 
-            driver_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
+            browser_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
             while (attempt < noAttempts_) {
                 try {
                     exceptionFlag = false
@@ -152,13 +157,14 @@ class ControlManager {
                 } catch (Exception err) {
                     exceptionFlag = true
                     attempt++
-                    log_.info("=== RADIO ATTEMPTS: $attempt ===")
+                    log_.info(">>> $controlID ATTEMPTS: $attempt")
                     field = reGetControlXPath(controlID, "//div[@id='"+controlID+"']/*/label[text()='Yes']")
                 } finally {
                     if (!exceptionFlag) attempt = noAttempts_
                 }
             }
         }
+        sampleResult_.subSampleEnd(true)
     }
 
     void checkBoxCtrl(){}
@@ -169,7 +175,7 @@ class ControlManager {
         def attempt = 0
         def exceptionFlag = false
 
-        driver_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
+        browser_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
         while (attempt < noAttempts_) {
             try {
                 exceptionFlag = false
@@ -177,11 +183,12 @@ class ControlManager {
             } catch (Exception err) {
                 exceptionFlag = true
                 attempt++
-                log_.info("=== BUTTON ATTEMPTS: $attempt ===")
+                log_.info("=== $controlID ATTEMPTS: $attempt ===")
                 field = reGetControl(controlID)
             } finally {
                 if (!exceptionFlag) attempt = noAttempts_
             }
         }
+        sampleResult_.subSampleEnd(true)
     }
 }
