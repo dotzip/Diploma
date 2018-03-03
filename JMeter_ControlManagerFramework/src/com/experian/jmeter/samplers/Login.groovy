@@ -1,3 +1,5 @@
+package com.experian.jmeter.samplers
+
 import org.apache.jmeter.threads.JMeterContextService
 import org.openqa.selenium.By
 import org.openqa.selenium.support.ui.ExpectedConditions
