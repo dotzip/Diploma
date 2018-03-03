@@ -8,22 +8,19 @@ class DataPoolExtractor {
     private String dataPoolFilePath_
     private HSSFWorkbook workbook_
     private HSSFSheet sheet_
-    private int customerColumnIndex_
-    private int controlsListIndex_
-    private int sheetSize_
-
+    private int customerColumnIndex_, controlsListIndex_, sheetSize_
 
     DataPoolExtractor(String dataPoolFilePath){
         this.dataPoolFilePath_ = dataPoolFilePath
         this.workbook_ = new HSSFWorkbook(new FileInputStream(dataPoolFilePath_))
     }
 
-    void sheetLoader(String sheetName){
+    def sheetLoader = { sheetName ->
         this.sheet_ = workbook_.getSheet(sheetName)
         this.sheetSize_ = sheet_.lastRowNum
     }
 
-    void controlsListLoader(String controlsListIndex){
+    def controlsListLoader = { controlsListIndex ->
         HSSFRow topRow = sheet_.getRow(0)
         topRow.each { cell ->
             if (cell.stringCellValue.equals(controlsListIndex)) {
@@ -32,7 +29,7 @@ class DataPoolExtractor {
         }
     }
 
-    void customerLoader(String customerCellID) {
+    def customerLoader = { customerCellID ->
         HSSFRow topRow = sheet_.getRow(0)
         topRow.each { cell ->
             if (cell.stringCellValue.equals(customerCellID)) {
@@ -49,7 +46,7 @@ class DataPoolExtractor {
                     return row.getCell(customerColumnIndex_).stringCellValue
                 }
             }
-        }catch (Exception ex){
+        }catch (Exception ex) {
             print ex.getMessage()
         }
     }

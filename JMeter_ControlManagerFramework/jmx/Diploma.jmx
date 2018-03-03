@@ -83,10 +83,9 @@ WDS.sampleResult.subSampleEnd(true)
           <stringProp name="WebDriverSampler.language">groovy</stringProp>
         </com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler>
         <hashTree/>
-        <com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler guiclass="com.googlecode.jmeter.plugins.webdriver.sampler.gui.WebDriverSamplerGui" testclass="com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler" testname="Control Manager Framework WebDriver Sampler" enabled="true">
+        <com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler guiclass="com.googlecode.jmeter.plugins.webdriver.sampler.gui.WebDriverSamplerGui" testclass="com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler" testname="Control Manager Framework" enabled="true">
           <stringProp name="WebDriverSampler.script">import org.openqa.selenium.By
 import org.openqa.selenium.Keys
-import org.openqa.selenium.StaleElementReferenceException
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.Select
 import org.openqa.selenium.support.ui.WebDriverWait
@@ -95,27 +94,26 @@ import org.apache.poi.hssf.usermodel.HSSFSheet
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import java.util.concurrent.TimeUnit
 import org.apache.jmeter.threads.JMeterContextService
+import static Boolean.FALSE as NO_SCROLLING
+import static Boolean.TRUE as SCROLLING
 
 class DataPoolExtractor {
     private String dataPoolFilePath_
     private HSSFWorkbook workbook_
     private HSSFSheet sheet_
-    private int customerColumnIndex_
-    private int controlsListIndex_
-    private int sheetSize_
-
+    private int customerColumnIndex_, controlsListIndex_, sheetSize_
 
     DataPoolExtractor(String dataPoolFilePath){
         this.dataPoolFilePath_ = dataPoolFilePath
         this.workbook_ = new HSSFWorkbook(new FileInputStream(dataPoolFilePath_))
     }
 
-    void sheetLoader(String sheetName){
+    def sheetLoader = { sheetName -&gt;
         this.sheet_ = workbook_.getSheet(sheetName)
         this.sheetSize_ = sheet_.lastRowNum
     }
 
-    void controlsListLoader(String controlsListIndex){
+    def controlsListLoader = { controlsListIndex -&gt;
         HSSFRow topRow = sheet_.getRow(0)
         topRow.each { cell -&gt;
             if (cell.stringCellValue.equals(controlsListIndex)) {
@@ -124,7 +122,7 @@ class DataPoolExtractor {
         }
     }
 
-    void customerLoader(String customerCellID) {
+    def customerLoader = { customerCellID -&gt;
         HSSFRow topRow = sheet_.getRow(0)
         topRow.each { cell -&gt;
             if (cell.stringCellValue.equals(customerCellID)) {
@@ -141,7 +139,7 @@ class DataPoolExtractor {
                     return row.getCell(customerColumnIndex_).stringCellValue
                 }
             }
-        }catch (Exception ex){
+        }catch (Exception ex) {
             print ex.getMessage()
         }
     }
@@ -150,12 +148,10 @@ class DataPoolExtractor {
 class ControlManager {
     private WebDriverWait driverWait_
     private DataPoolExtractor xls_
-    private def browser_
-    private def log_
-    private def sampleResult_
+    private def browser_, log_, sampleResult_
     private final int noAttempts_ = 15
 
-    ControlManager(WebDriverWait driverWait, DataPoolExtractor xls, def browser, def log, def sampleResult){
+    ControlManager(WebDriverWait driverWait, DataPoolExtractor xls, browser, log, sampleResult){
         this.driverWait_ = driverWait
         this.xls_ = xls
         this.browser_ = browser
@@ -163,49 +159,49 @@ class ControlManager {
         this.sampleResult_ = sampleResult
     }
 
-    void waitActive(){
+    def waitActive = {
         browser_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
         driverWait_.until(ExpectedConditions.invisibilityOfElementLocated(By.className(&apos;ajax_loader&apos;)))
         browser_.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS)
     }
 
-    void moveTo(def field, boolean scroll){
+    def moveTo = { field, scroll -&gt;
         browser_.executeScript(&quot;arguments[0].scrollIntoView($scroll);&quot;, field)
     }
 
-    def reGetControl(String controlID){
+    def reGetControl = { controlID -&gt;
         driverWait_.until(ExpectedConditions.visibilityOfElementLocated(By.id(controlID)))
         def field = browser_.findElement(By.id(controlID))
-        moveTo(field, true)
+        moveTo(field, SCROLLING)
         sampleResult_.subSampleStart(&quot;&gt;&gt;&gt; $controlID time&quot;)
         return field
     }
 
-    def reGetControlXPath(String controlID, String controlXPath){
+    def reGetControlXPath = { controlID, controlXPath -&gt;
         driverWait_.until(ExpectedConditions.visibilityOfElementLocated(By.id(controlID)))
         def field = browser_.findElement(By.xpath(controlXPath))
-        moveTo(field, true)
+        moveTo(field, SCROLLING)
         sampleResult_.subSampleStart(&quot;&gt;&gt;&gt; $controlID time&quot;)
         return field
     }
 
-    def preCtrl(String controlID){
+    def preCtrl = { controlID -&gt;
         browser_.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS)
         driverWait_.until(ExpectedConditions.visibilityOfElementLocated(By.id(controlID)))
         def field = browser_.findElement(By.id(controlID))
-        moveTo(field, false)
-        /* Subsample time */
+        moveTo(field, NO_SCROLLING)
+        /* Sub-sample time */
         sampleResult_.subSampleStart(&quot;&gt;&gt;&gt; $controlID time&quot;)
         waitActive()
         return field
     }
 
-    def preCtrlXPath(String controlID, String controlXPath){
+    def preCtrlXPath = { controlID, controlXPath -&gt;
         browser_.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS)
         driverWait_.until(ExpectedConditions.visibilityOfElementLocated(By.id(controlID)))
         def field = browser_.findElement(By.xpath(controlXPath))
-        moveTo(field, false)
-        /* Subsample time */
+        moveTo(field, NO_SCROLLING)
+        /* Sub-sample time */
         sampleResult_.subSampleStart(&quot;&gt;&gt;&gt; $controlID time&quot;)
         waitActive()
         return field
@@ -306,8 +302,8 @@ class ControlManager {
                     if (!exceptionFlag) attempt = noAttempts_
                 }
             }
+            sampleResult_.subSampleEnd(true)
         }
-        sampleResult_.subSampleEnd(true)
     }
 
     void checkBoxCtrl(){}

@@ -1,20 +1,22 @@
 package com.experian.jmeter.framework
 
 import org.openqa.selenium.By
+import org.openqa.selenium.Keys
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.Select
 import org.openqa.selenium.support.ui.WebDriverWait
 import java.util.concurrent.TimeUnit
+import org.apache.jmeter.threads.JMeterContextService
+import static Boolean.FALSE as NO_SCROLLING
+import static Boolean.TRUE as SCROLLING
 
 class ControlManager {
     private WebDriverWait driverWait_
     private DataPoolExtractor xls_
-    private def browser_
-    private def log_
-    private def sampleResult_
+    private def browser_, log_, sampleResult_
     private final int noAttempts_ = 15
 
-    ControlManager(WebDriverWait driverWait, DataPoolExtractor xls, def browser, def log, def sampleResult){
+    ControlManager(WebDriverWait driverWait, DataPoolExtractor xls, browser, log, sampleResult){
         this.driverWait_ = driverWait
         this.xls_ = xls
         this.browser_ = browser
@@ -22,49 +24,49 @@ class ControlManager {
         this.sampleResult_ = sampleResult
     }
 
-    void waitActive(){
+    def waitActive = {
         browser_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
         driverWait_.until(ExpectedConditions.invisibilityOfElementLocated(By.className('ajax_loader')))
         browser_.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS)
     }
 
-    void moveTo(def field, boolean scroll){
+    def moveTo = { field, scroll ->
         browser_.executeScript("arguments[0].scrollIntoView($scroll);", field)
     }
 
-    def reGetControl(String controlID){
+    def reGetControl = { controlID ->
         driverWait_.until(ExpectedConditions.visibilityOfElementLocated(By.id(controlID)))
         def field = browser_.findElement(By.id(controlID))
-        moveTo(field, true)
+        moveTo(field, SCROLLING)
         sampleResult_.subSampleStart(">>> $controlID time")
         return field
     }
 
-    def reGetControlXPath(String controlID, String controlXPath){
+    def reGetControlXPath = { controlID, controlXPath ->
         driverWait_.until(ExpectedConditions.visibilityOfElementLocated(By.id(controlID)))
         def field = browser_.findElement(By.xpath(controlXPath))
-        moveTo(field, true)
+        moveTo(field, SCROLLING)
         sampleResult_.subSampleStart(">>> $controlID time")
         return field
     }
 
-    def preCtrl(String controlID){
+    def preCtrl = { controlID ->
         browser_.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS)
         driverWait_.until(ExpectedConditions.visibilityOfElementLocated(By.id(controlID)))
         def field = browser_.findElement(By.id(controlID))
-        moveTo(field, false)
-        /* Subsample time */
+        moveTo(field, NO_SCROLLING)
+        /* Sub-sample time */
         sampleResult_.subSampleStart(">>> $controlID time")
         waitActive()
         return field
     }
 
-    def preCtrlXPath(String controlID, String controlXPath){
+    def preCtrlXPath = { controlID, controlXPath ->
         browser_.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS)
         driverWait_.until(ExpectedConditions.visibilityOfElementLocated(By.id(controlID)))
         def field = browser_.findElement(By.xpath(controlXPath))
-        moveTo(field, false)
-        /* Subsample time */
+        moveTo(field, NO_SCROLLING)
+        /* Sub-sample time */
         sampleResult_.subSampleStart(">>> $controlID time")
         waitActive()
         return field
@@ -74,8 +76,7 @@ class ControlManager {
         log_.info("=== SELECT $controlID: ${xls_.getStringDataRecord(controlID)} ===")
         def field = preCtrl(controlID)
         def select = new Select(field)
-        def attempt = 0
-        def exceptionFlag = false
+        def attempt = 0, exceptionFlag = false
 
         browser_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
         while (attempt < noAttempts_) {
@@ -165,8 +166,8 @@ class ControlManager {
                     if (!exceptionFlag) attempt = noAttempts_
                 }
             }
+            sampleResult_.subSampleEnd(true)
         }
-        sampleResult_.subSampleEnd(true)
     }
 
     void checkBoxCtrl(){}
