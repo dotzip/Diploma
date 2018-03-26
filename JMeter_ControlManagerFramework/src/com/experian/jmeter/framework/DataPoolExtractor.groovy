@@ -39,15 +39,16 @@ class DataPoolExtractor {
     }
 
     String getStringDataRecord(String controlID) {
-        try {
-            for (int i = 0; i < sheetSize_; i++) {
+        for (int i = 0; i < sheetSize_; i++) {
+            try {
                 HSSFRow row = sheet_.getRow(i)
                 if (row.getCell(controlsListIndex_).stringCellValue == controlID) {
                     return row.getCell(customerColumnIndex_).stringCellValue
                 }
+            }catch (Exception ex) {
+                print ex.getMessage()
             }
-        }catch (Exception ex) {
-            print ex.getMessage()
         }
+        return ""
     }
 }

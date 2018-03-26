@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jmeterTestPlan version="1.2" properties="3.2" jmeter="3.3 r1808647">
   <hashTree>
-    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Test Plan" enabled="true">
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Test Plan PCO Solution" enabled="true">
       <stringProp name="TestPlan.comments"></stringProp>
       <boolProp name="TestPlan.functional_mode">false</boolProp>
       <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
@@ -132,16 +132,17 @@ class DataPoolExtractor {
     }
 
     String getStringDataRecord(String controlID) {
-        try {
-            for (int i = 0; i &lt; sheetSize_; i++) {
+        for (int i = 0; i &lt; sheetSize_; i++) {
+            try {
                 HSSFRow row = sheet_.getRow(i)
                 if (row.getCell(controlsListIndex_).stringCellValue == controlID) {
                     return row.getCell(customerColumnIndex_).stringCellValue
                 }
+            }catch (Exception ex) {
+                print ex.getMessage()
             }
-        }catch (Exception ex) {
-            print ex.getMessage()
         }
+        return &quot;&quot;
     }
 }
 
@@ -173,7 +174,6 @@ class ControlManager {
         driverWait_.until(ExpectedConditions.visibilityOfElementLocated(By.id(controlID)))
         def field = browser_.findElement(By.id(controlID))
         moveTo(field, SCROLLING)
-        sampleResult_.subSampleStart(&quot;&gt;&gt;&gt; $controlID time&quot;)
         return field
     }
 
@@ -181,7 +181,6 @@ class ControlManager {
         driverWait_.until(ExpectedConditions.visibilityOfElementLocated(By.id(controlID)))
         def field = browser_.findElement(By.xpath(controlXPath))
         moveTo(field, SCROLLING)
-        sampleResult_.subSampleStart(&quot;&gt;&gt;&gt; $controlID time&quot;)
         return field
     }
 
@@ -306,7 +305,30 @@ class ControlManager {
         }
     }
 
-    void checkBoxCtrl(){}
+    void checkBoxCtrl(String controlID){
+        log_.info(&quot;=== CHECKBOX $controlID: ${xls_.getStringDataRecord(controlID)} ===&quot;)
+        if(xls_.getStringDataRecord(controlID) == &apos;Check&apos;){
+            def field = preCtrlXPath(controlID, &quot;//div[@id=&apos;&quot;+controlID+&quot;&apos;]/*/label&quot;)
+            def attempt = 0
+            def exceptionFlag = false
+
+            browser_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
+            while (attempt &lt; noAttempts_) {
+                try {
+                    exceptionFlag = false
+                    field.click()
+                } catch (Exception err) {
+                    exceptionFlag = true
+                    attempt++
+                    log_.info(&quot;&gt;&gt;&gt; $controlID ATTEMPTS: $attempt&quot;)
+                    field = reGetControlXPath(controlID, &quot;//div[@id=&apos;&quot;+controlID+&quot;&apos;]/*/label&quot;)
+                } finally {
+                    if (!exceptionFlag) attempt = noAttempts_
+                }
+            }
+            sampleResult_.subSampleEnd(true)
+        }
+    }
 
     void buttonCtrl(String controlID){
         log_.info(&quot;=== BUTTON $controlID ===&quot;)
@@ -360,7 +382,16 @@ ctrlManager.radioButtonCtrl(&quot;ProofOfAddressRbg&quot;)
 ctrlManager.radioButtonCtrl(&quot;ProofOfIncomeRbg&quot;)
 ctrlManager.radioButtonCtrl(&quot;PaymentProtectionRbg&quot;)
 //BUTTON
-ctrlManager.buttonCtrl(&quot;nav1Btn&quot;)</stringProp>
+ctrlManager.buttonCtrl(&quot;nav1Btn&quot;)
+
+//TAB applicantDetailsTab
+driverWait.until(ExpectedConditions.elementToBeClickable(By.xpath(&quot;//div[@id=&apos;applicantDetailsTab&apos;]/ul/li[2]&quot;))) // waiting when page will be load
+WDS.sampleResult.subSampleStart(&apos;&gt;&gt;&gt; Applicant Details Tab&apos;)
+WDS.browser.findElement(By.xpath(&quot;//div[@id=&apos;applicantDetailsTab&apos;]/ul/li[2]&quot;)).click()
+WDS.sampleResult.subSampleEnd(true)
+
+//CHECKBOX
+ctrlManager.checkBoxCtrl(&quot;checkboxgroupviewId&quot;)</stringProp>
           <stringProp name="WebDriverSampler.parameters"></stringProp>
           <stringProp name="WebDriverSampler.language">groovy</stringProp>
         </com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler>

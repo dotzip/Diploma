@@ -14,7 +14,7 @@ System.setProperty("webdriver.chrome.driver", "C:\\Users\\c22466a\\Documents\\Di
 
 WDS.log.info('Login')
 WDS.sampleResult.subSampleStart('>>> Get page')
-WDS.browser.get("http://sso.experian.local:8080/sso/UI/Login?realm=TENANT1")
+WDS.browser.get("url")
 WDS.sampleResult.subSampleEnd(true)
 
 WDS.browser.findElement(By.id("IDToken1")).click()

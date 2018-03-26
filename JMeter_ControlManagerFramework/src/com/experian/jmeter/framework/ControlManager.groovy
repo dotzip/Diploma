@@ -170,7 +170,30 @@ class ControlManager {
         }
     }
 
-    void checkBoxCtrl(){}
+    void checkBoxCtrl(String controlID){
+        log_.info("=== CHECKBOX $controlID: ${xls_.getStringDataRecord(controlID)} ===")
+        if(xls_.getStringDataRecord(controlID) == 'Check'){
+            def field = preCtrlXPath(controlID, "//div[@id='"+controlID+"']/*/label")
+            def attempt = 0
+            def exceptionFlag = false
+
+            browser_.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
+            while (attempt < noAttempts_) {
+                try {
+                    exceptionFlag = false
+                    field.click()
+                } catch (Exception err) {
+                    exceptionFlag = true
+                    attempt++
+                    log_.info(">>> $controlID ATTEMPTS: $attempt")
+                    field = reGetControlXPath(controlID, "//div[@id='"+controlID+"']/*/label")
+                } finally {
+                    if (!exceptionFlag) attempt = noAttempts_
+                }
+            }
+            sampleResult_.subSampleEnd(true)
+        }
+    }
 
     void buttonCtrl(String controlID){
         log_.info("=== BUTTON $controlID ===")
